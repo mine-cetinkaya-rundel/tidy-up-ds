@@ -81,7 +81,7 @@ knitr::include_graphics("img/fisheries.png")
 ## Get the data
 
 ```{r}
-fisheries <- read_csv("data/fisheries.csv")
+fisheries <- read_csv("../data/fisheries.csv")
 ```
 
 ---
@@ -118,7 +118,7 @@ fisheries
 ## Load continent data
 
 ```{r}
-continents <- read_csv("data/continents.csv")
+continents <- read_csv("../data/continents.csv")
 ```
 
 ---
@@ -735,7 +735,7 @@ years for which we have data. The values are percentage of hires of that type
 of faculty for each year.
 
 ```{r load-data-staff, message=FALSE}
-staff <- read_csv("data/instructional-staff.csv")
+staff <- read_csv("../data/instructional-staff.csv")
 staff
 ```
 
