@@ -105,7 +105,7 @@ are not included in the visualization:
 .pull-left[
 ```{r}
 fisheries <- fisheries %>%
-  dplyr::filter(total > 100000)
+  filter(total > 100000)
 ```
 ]
 .pull-right[
@@ -307,7 +307,7 @@ names(continents)
 
 ```{r}
 fisheries %>%
-  dplyr::filter(is.na(continent))
+  filter(is.na(continent))
 ```
 
 ---
@@ -331,7 +331,7 @@ fisheries <- fisheries %>%
 
 ```{r}
 fisheries %>%
-  dplyr::filter(is.na(continent))
+  filter(is.na(continent))
 ```
 
 ---

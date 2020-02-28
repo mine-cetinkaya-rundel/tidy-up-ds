@@ -136,7 +136,7 @@ are not included in the visualization:
 
 ```r
 fisheries &lt;- fisheries %&gt;%
-  dplyr::filter(total &gt; 100000)
+  filter(total &gt; 100000)
 ```
 ]
 .pull-right[
@@ -519,16 +519,16 @@ Hint:
 
 ```r
 fisheries %&gt;%
-  dplyr::filter(is.na(continent))
+  filter(is.na(continent))
 ```
 
 ```
 ## # A tibble: 3 x 5
-##   country                          capture aquaculture   total continent
-##   &lt;chr&gt;                              &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    
-## 1 Democratic Republic of the Congo  237372        3161  240533 &lt;NA&gt;     
-## 2 Hong Kong                         142775        4258  147033 &lt;NA&gt;     
-## 3 Myanmar                          2072390     1017644 3090034 &lt;NA&gt;
+##   country                         capture aquaculture  total continent
+##   &lt;chr&gt;                             &lt;dbl&gt;       &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;    
+## 1 Democratic Republic of the Con…  237372        3161 2.41e5 &lt;NA&gt;     
+## 2 Hong Kong                        142775        4258 1.47e5 &lt;NA&gt;     
+## 3 Myanmar                         2072390     1017644 3.09e6 &lt;NA&gt;
 ```
 
 ---
@@ -554,13 +554,13 @@ fisheries &lt;- fisheries %&gt;%
 
 ```r
 fisheries %&gt;%
-  dplyr::filter(is.na(continent))
+  filter(is.na(continent))
 ```
 
 ```
 ## # A tibble: 0 x 5
-## # … with 5 variables: country &lt;chr&gt;, capture &lt;dbl&gt;, aquaculture &lt;dbl&gt;,
-## #   total &lt;dbl&gt;, continent &lt;chr&gt;
+## # … with 5 variables: country &lt;chr&gt;, capture &lt;dbl&gt;,
+## #   aquaculture &lt;dbl&gt;, total &lt;dbl&gt;, continent &lt;chr&gt;
 ```
 
 ---
@@ -1926,17 +1926,17 @@ glimpse(fisheries_map)
 ```
 ## Rows: 72,685
 ## Columns: 11
-## $ country          &lt;chr&gt; "Angola", "Angola", "Angola", "Angola", "Angola", "…
-## $ capture          &lt;dbl&gt; 486490, 486490, 486490, 486490, 486490, 486490, 486…
-## $ aquaculture      &lt;dbl&gt; 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 6…
-## $ total            &lt;dbl&gt; 487145, 487145, 487145, 487145, 487145, 487145, 487…
-## $ continent        &lt;chr&gt; "Africa", "Africa", "Africa", "Africa", "Africa", "…
-## $ aquaculture_perc &lt;dbl&gt; 0.001344569, 0.001344569, 0.001344569, 0.001344569,…
-## $ long             &lt;dbl&gt; 23.96650, 23.98828, 24.01006, 24.02559, 24.04141, 2…
-## $ lat              &lt;dbl&gt; -10.87178, -11.00283, -11.18477, -11.31563, -11.374…
-## $ group            &lt;dbl&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
-## $ order            &lt;int&gt; 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 4…
-## $ subregion        &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ country          &lt;chr&gt; "Angola", "Angola", "Angola", "Angola", "A…
+## $ capture          &lt;dbl&gt; 486490, 486490, 486490, 486490, 486490, 48…
+## $ aquaculture      &lt;dbl&gt; 655, 655, 655, 655, 655, 655, 655, 655, 65…
+## $ total            &lt;dbl&gt; 487145, 487145, 487145, 487145, 487145, 48…
+## $ continent        &lt;chr&gt; "Africa", "Africa", "Africa", "Africa", "A…
+## $ aquaculture_perc &lt;dbl&gt; 0.001344569, 0.001344569, 0.001344569, 0.0…
+## $ long             &lt;dbl&gt; 23.96650, 23.98828, 24.01006, 24.02559, 24…
+## $ lat              &lt;dbl&gt; -10.87178, -11.00283, -11.18477, -11.31563…
+## $ group            &lt;dbl&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
+## $ order            &lt;int&gt; 423, 424, 425, 426, 427, 428, 429, 430, 43…
+## $ subregion        &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
 ```
 
 ---
@@ -2089,14 +2089,14 @@ staff
 
 ```
 ## # A tibble: 5 x 12
-##   faculty_type `1975` `1989` `1993` `1995` `1999` `2001` `2003` `2005` `2007`
-##   &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Full-Time T…   29     27.6   25     24.8   21.8   20.3   19.3   17.8   17.2
-## 2 Full-Time T…   16.1   11.4   10.2    9.6    8.9    9.2    8.8    8.2    8  
-## 3 Full-Time N…   10.3   14.1   13.6   13.6   15.2   15.5   15     14.8   14.9
-## 4 Part-Time F…   24     30.4   33.1   33.2   35.5   36     37     39.3   40.5
-## 5 Graduate St…   20.5   16.5   18.1   18.8   18.7   19     20     19.9   19.5
-## # … with 2 more variables: `2009` &lt;dbl&gt;, `2011` &lt;dbl&gt;
+##   faculty_type `1975` `1989` `1993` `1995` `1999` `2001` `2003` `2005`
+##   &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Full-Time T…   29     27.6   25     24.8   21.8   20.3   19.3   17.8
+## 2 Full-Time T…   16.1   11.4   10.2    9.6    8.9    9.2    8.8    8.2
+## 3 Full-Time N…   10.3   14.1   13.6   13.6   15.2   15.5   15     14.8
+## 4 Part-Time F…   24     30.4   33.1   33.2   35.5   36     37     39.3
+## 5 Graduate St…   20.5   16.5   18.1   18.8   18.7   19     20     19.9
+## # … with 3 more variables: `2007` &lt;dbl&gt;, `2009` &lt;dbl&gt;, `2011` &lt;dbl&gt;
 ```
 
 ---
@@ -2281,7 +2281,7 @@ Photo by Greg Rakozy on Unsplash.
 ]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
-<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/remark/0.14.0/remark.min.js"></script>
 <script>var slideshow = remark.create({
 "ratio": "16:9",
 "highlightLines": true,
