@@ -1,0 +1,919 @@
+---
+title: "Tidyverse ile verilerinize <br> çeki düzen verin"
+subtitle: "rstd.io/tidy-up-turkiye"
+output:
+  xaringan::moon_reader:
+    css: "slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+      slideNumberFormat: |
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);">
+          </div>
+        </div>
+---
+
+```{r child = "setup.Rmd"}
+```
+
+```{r packages, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(scales)
+```
+
+## tidyverse
+
+.pull-left[
+- Tidyverse, veri bilimi için tasarlanmış R paketlerinin prensipli bir koleksiyonudur. 
+- Tüm paketler, temel bir tasarım felsefesi, dilbilgisi ve veri yapısı paylaşır.
+<br>
+```{r echo=FALSE,out.width="50%", fig.align="center"}
+knitr::include_graphics("img/tidyverse.png")
+```
+]
+.pull-right[
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("img/tidyverse-packages.png")
+```
+]
+
+---
+
+background-image: url(img/fishing-boat.png)
+background-position: center
+background-repeat: no-repeat
+background-size: contain
+class: inverse
+
+# Dünya'da balıkçılık
+
+---
+
+- Birleşmiş Milletler'in Balıkçılık ve Su Ürünleri Bölümü ülkelerin balıkçılık üretimi hakkında veri toplar.
+- Aşağıdaki (pek de çekici olmayan) görselleştirme 2016 yılındaki balıkçılık hasatının dağılımını göstermektedir.
+
+<br>
+
+.pull-left[
+```{r echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics("img/fisheries-data.png")
+```
+]
+.pull-right[
+- Toplam hasadı 100.000 tondan az olan ülkeler görselleştirmeye dahil değil.
+- Source: [Fishing industry by country](https://en.wikipedia.org/wiki/Fishing_industry_by_country)
+]
+
+---
+
+.question[
+Bu görselleştirmeyi nasıl geliştirirsiniz?
+]
+
+```{r echo=FALSE, out.width="60%", fig.align="center"}
+knitr::include_graphics("img/fisheries.png")
+```
+
+--
+
+- Kıta düzeyinde görselleştirme
+- Haritalama
+
+---
+
+## Veri okuma
+
+```{r}
+balikcilik <- read_csv("data/balikcilik.csv")
+names(balikcilik)
+```
+
+---
+
+## Verilere göz atalım
+
+.midi[
+```{r}
+balikcilik
+```
+]
+
+---
+
+## Veri hazırlama
+
+Toplam hasadı 100.000 tondan az olan ülkeleri filtreleyerek çıkaralım:
+
+.midi[
+```{r}
+balikcilik <- balikcilik %>%
+  filter(toplam > 100000)
+
+balikcilik
+```
+]
+
+---
+
+## Kıta verilerini okuyalım
+
+.small[
+```{r}
+kitalar <- read_csv("data/kitalar.csv")
+kitalar
+```
+]
+
+---
+
+class: middle
+
+# Veri birleştirme
+
+---
+
+.pull-left[
+```{r}
+balikcilik %>% select(ulke)
+```
+]
+.pull-right[
+```{r}
+kitalar
+```
+]
+
+---
+
+## Tabloları birleştirme
+
+```{r eval=FALSE}
+[*]_join(x, y)
+```
+
+- `inner_join()`: x ve y'deki ortak satırlar
+- `left_join()`: x'teki bütün satırlar
+- `right_join()`: y'deki bütün satırlar
+- `full_join()`: x ve y'deki bütün satırlar
+- `anti_join()`: x'te olan ve y'de olmayan bütün satırlar
+- ...
+ 
+---
+
+## Set-up
+
+Sonraki birkaç slayt için...
+
+.pull-left[
+```{r echo=FALSE}
+x <- tibble(value = c(1, 2, 3))
+```
+```{r}
+x
+```
+]
+.pull-right[
+```{r echo=FALSE}
+y <- tibble(value = c(1, 2, 4))
+```
+```{r}
+y
+```
+]
+
+---
+
+## `inner_join()`
+
+.pull-left[
+```{r}
+inner_join(x, y)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("img/inner-join.gif")
+```
+]
+
+---
+
+## `left_join()`
+
+.pull-left[
+```{r}
+left_join(x, y)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("img/left-join.gif")
+```
+]
+
+---
+
+## `right_join()`
+
+.pull-left[
+```{r}
+right_join(x, y)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("img/right-join.gif")
+```
+]
+
+---
+
+## `full_join()`
+
+.pull-left[
+```{r}
+full_join(x, y)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("img/full-join.gif")
+```
+]
+
+---
+
+## `anti_join()`
+
+.pull-left[
+```{r}
+anti_join(x, y)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+knitr::include_graphics("img/anti-join.gif")
+```
+]
+
+---
+
+.question[
+`balikcilik` tablosundaki tum satır ve sütunları tutmak ve bu tablodaki ülkelerin hangi kıtada olduğunu gosteren bir sütun daha eklemek istiyoruz. Hangi `*_join()` foksiyonunu kullanmalıyız?
+]
+
+.pull-left[
+```{r}
+balikcilik %>% select(ulke)
+```
+]
+.pull-right[
+```{r}
+kitalar
+```
+]
+
+---
+
+## Balıkçılık ve kıtalar tablolarını birleştirme
+
+```{r}
+balikcilik <- left_join(balikcilik, kitalar) 
+```
+
+--
+
+.question[
+`left_join()` foksiyonu bu iki tabloyu `ulke` sütunu üzerinden birleştirmeyi nasıl biliyor?
+]
+
+İpucu:
+
+- Orjinal `balikcilik` tablosundaki sütunlar:
+
+```{r echo=FALSE}
+balikcilik %>% select(-kita) %>% names()
+```
+
+- `kitalar` tablosundaki sütunlar:
+
+```{r echo=FALSE}
+names(kitalar)
+```
+
+---
+
+## Verileri kontrol edelim
+
+```{r}
+balikcilik %>%
+  filter(is.na(kita))
+```
+
+---
+
+## Düzeltmeleri uygulayalım
+
+```{r}
+balikcilik <- balikcilik %>%
+  mutate(kita = case_when(
+    ulke == "Democratic Republic of the Congo" ~ "Africa",
+    ulke == "Hong Kong"                        ~ "Asia",
+    ulke == "Myanmar"                          ~ "Asia",
+    TRUE                                       ~ kita
+    )
+  )
+```
+
+--
+
+...ve tekrar kontrol edelim
+
+```{r}
+balikcilik %>%
+  filter(is.na(kita))
+```
+
+---
+
+.question[
+Aşağıdaki kod ne yapar?
+]
+
+```{r}
+balikcilik <- balikcilik %>%
+  mutate(uretim_yuzde = uretim / toplam)
+```
+
+---
+
+## Kıta düzeyinde özetleme
+
+```{r message=FALSE}
+balikcilik_ozet <- balikcilik %>%
+  group_by(kita) %>%
+  summarise(
+    uretim_yuzde_min = min(uretim_yuzde),
+    uretim_yuzde_ort = mean(uretim_yuzde),
+    uretim_yuzde_max = max(uretim_yuzde)
+  ) 
+
+balikcilik_ozet
+```
+
+---
+
+## Kıta düzeyindeyinde görselleştirme
+
+```{r fig.height=3,fig.width=7}
+ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
+  geom_col()
+```
+
+---
+
+## Görselleştirmeyi geliştirelim
+
+```{r bar-chart-improve, fig.show = "hide"}
+ggplot(balikcilik_ozet, 
+       aes(y = fct_reorder(kita, uretim_yuzde_ort), #<<
+           x = uretim_yuzde_ort)) +
+  geom_col() +
+  scale_x_continuous(labels = percent) + #<<
+  labs(
+    x = NULL, y = NULL,
+    title = "Su ürünleri yetiştiriciliği",
+    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
+  ) +
+  theme_minimal()
+```
+
+---
+
+```{r ref.label = "bar-chart-improve", echo = FALSE}
+```
+
+---
+
+## Tablo oluşturma
+
+.pull-left[
+```{r}
+kita_ceviri <- tribble(
+  ~kita,      ~kita_turkce,
+  "Asia",     "Asya",
+  "Americas", "Amerika",
+  "Europe",   "Avrupa",
+  "Oceania",  "Okyanusya",
+  "Africa",   "Afrika"
+)
+```
+]
+.pull-right[
+```{r}
+kita_ceviri
+```
+]
+
+---
+
+```{r bar-chart-improve-translate, fig.show = "hide"}
+balikcilik_ozet %>%
+  left_join(kita_ceviri) %>% #<<
+  ggplot(aes(y = fct_reorder(kita_turkce, uretim_yuzde_ort),
+             x = uretim_yuzde_ort)) +
+  geom_col() +
+  scale_x_continuous(
+    labels = percent_format(prefix = "%", suffix = NULL) #<<
+    ) + 
+  labs(
+    x = NULL, y = NULL,
+    title = "Su ürünleri yetiştiriciliği",
+    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
+  ) +
+  theme_minimal()
+```
+
+---
+
+```{r bar-chart-improve-translate, echo = FALSE, message = FALSE}
+```
+
+---
+
+class: middle
+
+# Mapping
+
+---
+
+## Balıkçılık verilerini haritalama
+
+- Ülke sınırlarını data frame olarak saklayın
+- `balikcilik` data frame'ini ülke sinirlari data frame'i ile birleştirelim
+- Ülke sınırlarını çizip iclerini su ürünleri yetiştiriciliği payıyla dolduralım
+
+
+---
+
+## `map_data()`
+
+`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir data frame'e çevirir:
+
+```{r}
+map_data("world")
+```
+
+---
+
+
+```{r}
+knitr::knit_exit()
+```
+
+# A few fixes for better matching
+
+.question[
+What does the following code do?
+]
+
+```{r}
+world_map <- map_data("world") %>%
+  mutate(region = case_when(
+    region == "UK"           ~ "United Kingdom",
+    region == "USA"          ~ "United States",
+    subregion == "Hong Kong" ~ "Hong Kong",
+    TRUE                     ~ region
+    )
+  )
+```
+
+---
+
+## Map the world
+
+.midi[
+```{r fig.height=5, fig.width=12}
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "gray") +
+  theme_minimal()
+```
+]
+
+---
+
+## Join fisheries and world map
+
+.pull-left[
+```{r}
+fisheries %>% select(country)
+```
+]
+.pull-right[
+```{r}
+world_map %>% select(region)
+```
+]
+
+---
+
+## Join fisheries and world map
+
+```{r}
+fisheries_map <- left_join(fisheries, world_map, 
+                           by = c("country" = "region"))
+```
+
+```{r}
+glimpse(fisheries_map)
+```
+
+---
+
+## Mapping fisheries
+
+.midi[
+```{r fig.height=4.5, fig.width=12}
+ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = capture)) +
+  scale_fill_viridis_c() +
+  theme_minimal()
+```
+]
+
+---
+
+.question[
+What is misleading about the following map?
+]
+
+.midi[
+```{r echo=FALSE, fig.height=5, fig.width=12, fig.align="center"}
+ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = capture)) +
+  scale_fill_viridis_c() +
+  theme_minimal()
+```
+]
+
+---
+
+## Putting it altogether
+
+```{r eval=FALSE}
+ggplot() +
+  geom_polygon(world_map, 
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(fisheries_map, 
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = capture)) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by capture, 2016",
+    subtitle = "Capture measured in tonnes",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
+ggplot() +
+  geom_polygon(world_map, 
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(fisheries_map, 
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = capture)) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by capture, 2016",
+    subtitle = "Capture measured in tonnes",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+## Log scale
+
+```{r eval=FALSE}
+ggplot() +
+  geom_polygon(world_map, 
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(fisheries_map, 
+               mapping = aes(x = long, y = lat, group = group, 
+                                            fill = log(capture))) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by capture, 2016",
+    subtitle = "Capture measured in logged tonnes",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+## Log scale
+
+```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
+ggplot() +
+  geom_polygon(world_map, mapping = aes(x = long, y = lat, group = group), fill = "lightgray") +
+  geom_polygon(fisheries_map, mapping = aes(x = long, y = lat, group = group, fill = log(capture))) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by capture, 2016",
+    subtitle = "Capture measured in logged tonnes",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+## Aquaculture
+
+```{r eval=FALSE}
+ggplot() +
+  geom_polygon(world_map, 
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(fisheries_map, 
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = log(aquaculture+1))) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by aquaculture, 2016",
+    subtitle = "Aquaculture measured in logged tonnes",
+    fill = "log(aquaculture)",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
+ggplot() +
+  geom_polygon(world_map, mapping = aes(x = long, y = lat, group = group), fill = "lightgray") +
+  geom_polygon(fisheries_map, mapping = aes(x = long, y = lat, group = group, fill = log(aquaculture+1))) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(
+    x = "", y = "",
+    title = "Fisheries harvest by aquaculture, 2016",
+    subtitle = "Aquaculture measured in logged tonnes",
+    fill = "log(aquaculture)",
+    caption = "Source: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
+fisheries_map <- fisheries_map %>%
+  mutate(
+    aquaculture_perc = aquaculture / total
+  )
+
+ggplot() +
+  geom_polygon(world_map, 
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(fisheries_map, 
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = aquaculture_perc)) +
+  scale_fill_viridis_c(labels = percent_format(accuracy = 1)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.key.width = unit(2, "lines")) +
+  labs(
+    x = "", y = "",
+    title = "Average share of aquaculture by country",
+    subtitle = "out of total fisheries harvest, 2016",
+    caption = "Source: bit.ly/2VrawTt",
+    fill = "Aquaculture %"
+  )
+```
+
+---
+
+class: center, middle
+
+# Instructional staff employment trends
+
+---
+
+The American Association of 
+University Professors (AAUP) is a nonprofit membership association of faculty 
+and other academic professionals. 
+[This report](https://www.aaup.org/sites/default/files/files/AAUP_Report_InstrStaff-75-11_apr2013.pdf) 
+by the AAUP shows trends in instructional staff employees between 1975 
+and 2011, and contains an image very similar to the one given below.
+
+```{r echo=FALSE,out.width="80%",fig.align="center"}
+knitr::include_graphics("img/staff-employment.png")
+```
+
+---
+
+## Data
+
+Each row in this dataset represents a faculty type, and the columns are the 
+years for which we have data. The values are percentage of hires of that type 
+of faculty for each year.
+
+```{r load-data-staff, message=FALSE}
+staff <- read_csv("data/instructional-staff.csv")
+staff
+```
+
+---
+
+## Recreate the visualization
+
+In order to recreate this visualization we need to first reshape the data to have 
+one variable for faculty type and one variable for year. In other words, 
+we will convert the data from the long format to wide format. 
+
+But before we do so... 
+
+.question[
+If the long data will have a row for each year/faculty type combination, 
+and there are 5 faculty types and 11 years of data, how many rows will the data have?
+]
+
+---
+
+class: center, middle
+
+```{r echo=FALSE,out.width="80%",fig.align="center"}
+knitr::include_graphics("img/pivot.gif")
+```
+
+---
+
+## `pivot_*()` functions
+
+
+```{r echo=FALSE}
+knitr::include_graphics("img/tidyr-longer-wider.gif")
+```
+
+---
+
+## `pivot_longer()`
+
+```{r eval=FALSE}
+pivot_longer(data, cols, names_to = "name", values_to = "value")
+```
+
+- The first argument is `data` as usual.
+- The second argument, `cols`, is where you specify which columns to pivot 
+into longer format -- in this case all columns except for the `faculty_type` 
+- The third argument, `names_to`, is a string specifying the name of the column to create from the data stored in the column names of data -- in this case `year`
+- The fourth argument, `values_to`, is a string specifying the name of the column to create from the data stored in cell values, in this case `percentage`
+
+---
+
+## Pivot staff data
+
+.midi[
+```{r}
+staff_long <- staff %>%
+  pivot_longer(cols = -faculty_type, names_to = "year", 
+               values_to = "percentage") %>%
+  mutate(percentage = as.numeric(percentage))
+
+staff_long
+```
+]
+
+---
+
+.question[
+This doesn't look quite right, how would you fix it?
+]
+
+.small[
+```{r fig.height=2}
+staff_long %>%
+  ggplot(aes(x = percentage, y = year, color = faculty_type)) +
+  geom_col(position = "dodge")
+```
+]
+
+---
+
+.midi[
+```{r fig.height=2}
+staff_long %>%
+  ggplot(aes(x = percentage, y = year, fill = faculty_type)) +
+  geom_col(position = "dodge")
+```
+]
+
+---
+
+## Some improvement...
+
+.midi[
+```{r fig.height=2}
+staff_long %>%
+  ggplot(aes(x = percentage, y = year, fill = faculty_type)) +
+  geom_col()
+```
+]
+
+---
+
+## More improvement
+
+.midi[
+```{r fig.width=7}
+staff_long %>%
+  ggplot(aes(x = year, y = percentage, group = faculty_type, 
+             color = faculty_type)) +
+  geom_line() +
+  theme_minimal()
+```
+]
+
+---
+
+.midi[
+```{r fig.width=7, fig.height=4, echo=FALSE}
+staff_long %>%
+  mutate(part_time = if_else(faculty_type == "Part-Time Faculty", "Part-Time Faculty", "Other Faculty")) %>%
+  ggplot(aes(x = year, y = percentage/100, group = faculty_type, 
+             color = part_time)) +
+  geom_line() +
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme_minimal() +
+  labs(
+    title = "Instructional staff employment trends",
+    x = "Year",
+    y = "Percentage",
+    color = ""
+  ) +
+  theme(legend.position = "bottom")
+```
+]
+
+---
+
+.midi[
+```{r eval=FALSE}
+staff_long %>%
+  mutate(part_time = 
+           if_else(faculty_type == "Part-Time Faculty", 
+                   "Part-Time Faculty", "Other Faculty")) %>%
+  ggplot(aes(x = year, y = percentage/100, group = faculty_type, 
+             color = part_time)) +
+  geom_line() +
+  scale_color_manual(values = c("gray", "red")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme_minimal() +
+  labs(
+    title = "Instructional staff employment trends",
+    x = "Year",
+    y = "Percentage",
+    color = ""
+  ) +
+  theme(legend.position = "bottom")
+```
+]
+
+---
+
+class: middle, center
+
+background-image: url("img/greg-rakozy-oMpAz-DN-9I-unsplash.jpg")
+
+<font color="white" style="bold" size="100px">Learn more at tidyverse.org!</font>
+
+.footnote[
+Photo by Greg Rakozy on Unsplash.
+]

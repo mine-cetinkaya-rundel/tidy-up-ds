@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Tidyverse ile verilerinize   çeki düzen verin</title>
+    <meta charset="utf-8" />
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tidyverse ile verilerinize <br> çeki düzen verin
+## rstd.io/tidy-up-turkiye
+
+---
+
+
+
+
+
+
+
+## tidyverse
+
+.pull-left[
+- Tidyverse, veri bilimi için tasarlanmış R paketlerinin prensipli bir koleksiyonudur. 
+- Tüm paketler, temel bir tasarım felsefesi, dilbilgisi ve veri yapısı paylaşır.
+&lt;br&gt;
+&lt;img src="img/tidyverse.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+&lt;img src="img/tidyverse-packages.png" width="100%" /&gt;
+]
+
+---
+
+background-image: url(img/fishing-boat.png)
+background-position: center
+background-repeat: no-repeat
+background-size: contain
+class: inverse
+
+# Dünya'da balıkçılık
+
+---
+
+- Birleşmiş Milletler'in Balıkçılık ve Su Ürünleri Bölümü ülkelerin balıkçılık üretimi hakkında veri toplar.
+- Aşağıdaki (pek de çekici olmayan) görselleştirme 2016 yılındaki balıkçılık hasatının dağılımını göstermektedir.
+
+&lt;br&gt;
+
+.pull-left[
+&lt;img src="img/fisheries-data.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+- Toplam hasadı 100.000 tondan az olan ülkeler görselleştirmeye dahil değil.
+- Source: [Fishing industry by country](https://en.wikipedia.org/wiki/Fishing_industry_by_country)
+]
+
+---
+
+.question[
+Bu görselleştirmeyi nasıl geliştirirsiniz?
+]
+
+&lt;img src="img/fisheries.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+--
+
+- Kıta düzeyinde görselleştirme
+- Haritalama
+
+---
+
+## Veri okuma
+
+
+```r
+balikcilik &lt;- read_csv("data/balikcilik.csv")
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   ulke = col_character(),
+##   hasat = col_double(),
+##   uretim = col_double(),
+##   toplam = col_double()
+## )
+```
+
+```r
+names(balikcilik)
+```
+
+```
+## [1] "ulke"   "hasat"  "uretim" "toplam"
+```
+
+---
+
+## Verilere göz atalım
+
+.midi[
+
+```r
+balikcilik
+```
+
+```
+## # A tibble: 216 x 4
+##    ulke                 hasat uretim toplam
+##    &lt;chr&gt;                &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+##  1 Afghanistan           1000   1200   2200
+##  2 Albania               7886    950   8836
+##  3 Algeria              95000   1361  96361
+##  4 American Samoa        3047     20   3067
+##  5 Andorra                  0      0      0
+##  6 Angola              486490    655 487145
+##  7 Antigua and Barbuda   3000     10   3010
+##  8 Argentina           755226   3673 758899
+##  9 Armenia               3758  16381  20139
+## 10 Aruba                  142      0    142
+## # … with 206 more rows
+```
+]
+
+---
+
+## Veri hazırlama
+
+Toplam hasadı 100.000 tondan az olan ülkeleri filtreleyerek çıkaralım:
+
+.midi[
+
+```r
+balikcilik &lt;- balikcilik %&gt;%
+  filter(toplam &gt; 100000)
+
+balikcilik
+```
+
+```
+## # A tibble: 82 x 4
+##    ulke         hasat  uretim  toplam
+##    &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Angola      486490     655  487145
+##  2 Argentina   755226    3673  758899
+##  3 Australia   174629   96847  271476
+##  4 Bangladesh 1674770 2203554 3878324
+##  5 Brazil      705000  581230 1286230
+##  6 Cambodia    629950  172500  802450
+##  7 Cameroon    233190    2315  235505
+##  8 Canada      874727  200765 1075492
+##  9 Chad        110000      94  110094
+## 10 Chile      1829238 1050117 2879355
+## # … with 72 more rows
+```
+]
+
+---
+
+## Kıta verilerini okuyalım
+
+.small[
+
+```r
+kitalar &lt;- read_csv("data/kitalar.csv")
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   ulke = col_character(),
+##   kita = col_character()
+## )
+```
+
+```r
+kitalar
+```
+
+```
+## # A tibble: 245 x 2
+##    ulke              kita    
+##    &lt;chr&gt;             &lt;chr&gt;   
+##  1 Afghanistan       Asia    
+##  2 Åland Islands     Europe  
+##  3 Albania           Europe  
+##  4 Algeria           Africa  
+##  5 American Samoa    Oceania 
+##  6 Andorra           Europe  
+##  7 Angola            Africa  
+##  8 Anguilla          Americas
+##  9 Antigua &amp; Barbuda Americas
+## 10 Argentina         Americas
+## # … with 235 more rows
+```
+]
+
+---
+
+class: middle
+
+# Veri birleştirme
+
+---
+
+.pull-left[
+
+```r
+balikcilik %&gt;% select(ulke)
+```
+
+```
+## # A tibble: 82 x 1
+##    ulke      
+##    &lt;chr&gt;     
+##  1 Angola    
+##  2 Argentina 
+##  3 Australia 
+##  4 Bangladesh
+##  5 Brazil    
+##  6 Cambodia  
+##  7 Cameroon  
+##  8 Canada    
+##  9 Chad      
+## 10 Chile     
+## # … with 72 more rows
+```
+]
+.pull-right[
+
+```r
+kitalar
+```
+
+```
+## # A tibble: 245 x 2
+##    ulke              kita    
+##    &lt;chr&gt;             &lt;chr&gt;   
+##  1 Afghanistan       Asia    
+##  2 Åland Islands     Europe  
+##  3 Albania           Europe  
+##  4 Algeria           Africa  
+##  5 American Samoa    Oceania 
+##  6 Andorra           Europe  
+##  7 Angola            Africa  
+##  8 Anguilla          Americas
+##  9 Antigua &amp; Barbuda Americas
+## 10 Argentina         Americas
+## # … with 235 more rows
+```
+]
+
+---
+
+## Tabloları birleştirme
+
+
+```r
+[*]_join(x, y)
+```
+
+- `inner_join()`: x ve y'deki ortak satırlar
+- `left_join()`: x'teki bütün satırlar
+- `right_join()`: y'deki bütün satırlar
+- `full_join()`: x ve y'deki bütün satırlar
+- `anti_join()`: x'te olan ve y'de olmayan bütün satırlar
+- ...
+ 
+---
+
+## Set-up
+
+Sonraki birkaç slayt için...
+
+.pull-left[
+
+
+```r
+x
+```
+
+```
+## # A tibble: 3 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+## 3     3
+```
+]
+.pull-right[
+
+
+```r
+y
+```
+
+```
+## # A tibble: 3 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+## 3     4
+```
+]
+
+---
+
+## `inner_join()`
+
+.pull-left[
+
+```r
+inner_join(x, y)
+```
+
+```
+## Joining, by = "value"
+```
+
+```
+## # A tibble: 2 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+```
+]
+.pull-right[
+![](img/inner-join.gif)&lt;!-- --&gt;
+]
+
+---
+
+## `left_join()`
+
+.pull-left[
+
+```r
+left_join(x, y)
+```
+
+```
+## Joining, by = "value"
+```
+
+```
+## # A tibble: 3 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+## 3     3
+```
+]
+.pull-right[
+![](img/left-join.gif)&lt;!-- --&gt;
+]
+
+---
+
+## `right_join()`
+
+.pull-left[
+
+```r
+right_join(x, y)
+```
+
+```
+## Joining, by = "value"
+```
+
+```
+## # A tibble: 3 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+## 3     4
+```
+]
+.pull-right[
+![](img/right-join.gif)&lt;!-- --&gt;
+]
+
+---
+
+## `full_join()`
+
+.pull-left[
+
+```r
+full_join(x, y)
+```
+
+```
+## Joining, by = "value"
+```
+
+```
+## # A tibble: 4 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     1
+## 2     2
+## 3     3
+## 4     4
+```
+]
+.pull-right[
+![](img/full-join.gif)&lt;!-- --&gt;
+]
+
+---
+
+## `anti_join()`
+
+.pull-left[
+
+```r
+anti_join(x, y)
+```
+
+```
+## Joining, by = "value"
+```
+
+```
+## # A tibble: 1 x 1
+##   value
+##   &lt;dbl&gt;
+## 1     3
+```
+]
+.pull-right[
+![](img/anti-join.gif)&lt;!-- --&gt;
+]
+
+---
+
+.question[
+`balikcilik` tablosundaki tum satır ve sütunları tutmak ve bu tablodaki ülkelerin hangi kıtada olduğunu gosteren bir sütun daha eklemek istiyoruz. Hangi `*_join()` foksiyonunu kullanmalıyız?
+]
+
+.pull-left[
+
+```r
+balikcilik %&gt;% select(ulke)
+```
+
+```
+## # A tibble: 82 x 1
+##    ulke      
+##    &lt;chr&gt;     
+##  1 Angola    
+##  2 Argentina 
+##  3 Australia 
+##  4 Bangladesh
+##  5 Brazil    
+##  6 Cambodia  
+##  7 Cameroon  
+##  8 Canada    
+##  9 Chad      
+## 10 Chile     
+## # … with 72 more rows
+```
+]
+.pull-right[
+
+```r
+kitalar
+```
+
+```
+## # A tibble: 245 x 2
+##    ulke              kita    
+##    &lt;chr&gt;             &lt;chr&gt;   
+##  1 Afghanistan       Asia    
+##  2 Åland Islands     Europe  
+##  3 Albania           Europe  
+##  4 Algeria           Africa  
+##  5 American Samoa    Oceania 
+##  6 Andorra           Europe  
+##  7 Angola            Africa  
+##  8 Anguilla          Americas
+##  9 Antigua &amp; Barbuda Americas
+## 10 Argentina         Americas
+## # … with 235 more rows
+```
+]
+
+---
+
+## Balıkçılık ve kıtalar tablolarını birleştirme
+
+
+```r
+balikcilik &lt;- left_join(balikcilik, kitalar) 
+```
+
+```
+## Joining, by = "ulke"
+```
+
+--
+
+.question[
+`left_join()` foksiyonu bu iki tabloyu `ulke` sütunu üzerinden birleştirmeyi nasıl biliyor?
+]
+
+İpucu:
+
+- Orjinal `balikcilik` tablosundaki sütunlar:
+
+
+```
+## [1] "ulke"   "hasat"  "uretim" "toplam"
+```
+
+- `kitalar` tablosundaki sütunlar:
+
+
+```
+## [1] "ulke" "kita"
+```
+
+---
+
+## Verileri kontrol edelim
+
+
+```r
+balikcilik %&gt;%
+  filter(is.na(kita))
+```
+
+```
+## # A tibble: 3 x 5
+##   ulke                               hasat  uretim  toplam kita 
+##   &lt;chr&gt;                              &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;
+## 1 Democratic Republic of the Congo  237372    3161  240533 &lt;NA&gt; 
+## 2 Hong Kong                         142775    4258  147033 &lt;NA&gt; 
+## 3 Myanmar                          2072390 1017644 3090034 &lt;NA&gt;
+```
+
+---
+
+## Düzeltmeleri uygulayalım
+
+
+```r
+balikcilik &lt;- balikcilik %&gt;%
+  mutate(kita = case_when(
+    ulke == "Democratic Republic of the Congo" ~ "Africa",
+    ulke == "Hong Kong"                        ~ "Asia",
+    ulke == "Myanmar"                          ~ "Asia",
+    TRUE                                       ~ kita
+    )
+  )
+```
+
+--
+
+...ve tekrar kontrol edelim
+
+
+```r
+balikcilik %&gt;%
+  filter(is.na(kita))
+```
+
+```
+## # A tibble: 0 x 5
+## # … with 5 variables: ulke &lt;chr&gt;, hasat &lt;dbl&gt;, uretim &lt;dbl&gt;, toplam &lt;dbl&gt;, kita &lt;chr&gt;
+```
+
+---
+
+.question[
+Aşağıdaki kod ne yapar?
+]
+
+
+```r
+balikcilik &lt;- balikcilik %&gt;%
+  mutate(uretim_yuzde = uretim / toplam)
+```
+
+---
+
+## Kıta düzeyinde özetleme
+
+
+```r
+balikcilik_ozet &lt;- balikcilik %&gt;%
+  group_by(kita) %&gt;%
+  summarise(
+    uretim_yuzde_min = min(uretim_yuzde),
+    uretim_yuzde_ort = mean(uretim_yuzde),
+    uretim_yuzde_max = max(uretim_yuzde)
+  ) 
+
+balikcilik_ozet
+```
+
+```
+## # A tibble: 5 x 4
+##   kita     uretim_yuzde_min uretim_yuzde_ort uretim_yuzde_max
+## * &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Africa            0                 0.0943            0.803
+## 2 Americas          0                 0.192             0.529
+## 3 Asia              0                 0.367             0.782
+## 4 Europe            0.00682           0.165             0.618
+## 5 Oceania           0.0197            0.150             0.357
+```
+
+---
+
+## Kıta düzeyindeyinde görselleştirme
+
+
+```r
+ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
+  geom_col()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-37-1.png" width="2100" /&gt;
+
+---
+
+## Görselleştirmeyi geliştirelim
+
+
+```r
+ggplot(balikcilik_ozet, 
+*      aes(y = fct_reorder(kita, uretim_yuzde_ort),
+           x = uretim_yuzde_ort)) +
+  geom_col() +
+* scale_x_continuous(labels = percent) +
+  labs(
+    x = NULL, y = NULL,
+    title = "Su ürünleri yetiştiriciliği",
+    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
+  ) +
+  theme_minimal()
+```
+
+---
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-38-1.png" width="1500" /&gt;
+
+---
+
+## Tablo oluşturma
+
+.pull-left[
+
+```r
+kita_ceviri &lt;- tribble(
+  ~kita,      ~kita_turkce,
+  "Asia",     "Asya",
+  "Americas", "Amerika",
+  "Europe",   "Avrupa",
+  "Oceania",  "Okyanusya",
+  "Africa",   "Afrika"
+)
+```
+]
+.pull-right[
+
+```r
+kita_ceviri
+```
+
+```
+## # A tibble: 5 x 2
+##   kita     kita_turkce
+##   &lt;chr&gt;    &lt;chr&gt;      
+## 1 Asia     Asya       
+## 2 Americas Amerika    
+## 3 Europe   Avrupa     
+## 4 Oceania  Okyanusya  
+## 5 Africa   Afrika
+```
+]
+
+---
+
+
+```r
+balikcilik_ozet %&gt;%
+* left_join(kita_ceviri) %&gt;%
+  ggplot(aes(y = fct_reorder(kita_turkce, uretim_yuzde_ort),
+             x = uretim_yuzde_ort)) +
+  geom_col() +
+  scale_x_continuous(
+*   labels = percent_format(prefix = "%", suffix = NULL)
+    ) + 
+  labs(
+    x = NULL, y = NULL,
+    title = "Su ürünleri yetiştiriciliği",
+    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
+  ) +
+  theme_minimal()
+```
+
+```
+## Joining, by = "kita"
+```
+
+---
+
+&lt;img src="tidy-up_files/figure-html/bar-chart-improve-translate-1.png" width="1500" /&gt;
+
+---
+
+class: middle
+
+# Mapping
+
+---
+
+## Balıkçılık verilerini haritalama
+
+- Ülke sınırlarını data frame olarak saklayın
+- `balikcilik` data frame'ini ülke sinirlari data frame'i ile birleştirelim
+- Ülke sınırlarını çizip iclerini su ürünleri yetiştiriciliği payıyla dolduralım
+
+
+---
+
+## `map_data()`
+
+`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir data frame'e çevirir:
+
+
+```r
+map_data("world")
+```
+
+```
+##          long      lat group order      region subregion
+## 1   -69.89912 12.45200     1     1       Aruba      &lt;NA&gt;
+## 2   -69.89571 12.42300     1     2       Aruba      &lt;NA&gt;
+## 3   -69.94219 12.43853     1     3       Aruba      &lt;NA&gt;
+## 4   -70.00415 12.50049     1     4       Aruba      &lt;NA&gt;
+## 5   -70.06612 12.54697     1     5       Aruba      &lt;NA&gt;
+## 6   -70.05088 12.59707     1     6       Aruba      &lt;NA&gt;
+## 7   -70.03511 12.61411     1     7       Aruba      &lt;NA&gt;
+## 8   -69.97314 12.56763     1     8       Aruba      &lt;NA&gt;
+## 9   -69.91181 12.48047     1     9       Aruba      &lt;NA&gt;
+## 10  -69.89912 12.45200     1    10       Aruba      &lt;NA&gt;
+## 12   74.89131 37.23164     2    12 Afghanistan      &lt;NA&gt;
+## 13   74.84023 37.22505     2    13 Afghanistan      &lt;NA&gt;
+## 14   74.76738 37.24917     2    14 Afghanistan      &lt;NA&gt;
+## 15   74.73896 37.28564     2    15 Afghanistan      &lt;NA&gt;
+## 16   74.72666 37.29072     2    16 Afghanistan      &lt;NA&gt;
+## 17   74.66895 37.26670     2    17 Afghanistan      &lt;NA&gt;
+## 18   74.55899 37.23662     2    18 Afghanistan      &lt;NA&gt;
+## 19   74.37217 37.15771     2    19 Afghanistan      &lt;NA&gt;
+## 20   74.37617 37.13735     2    20 Afghanistan      &lt;NA&gt;
+## 21   74.49796 37.05722     2    21 Afghanistan      &lt;NA&gt;
+## 22   74.52646 37.03066     2    22 Afghanistan      &lt;NA&gt;
+## 23   74.54140 37.02217     2    23 Afghanistan      &lt;NA&gt;
+## 24   74.43106 36.98369     2    24 Afghanistan      &lt;NA&gt;
+## 25   74.19473 36.89688     2    25 Afghanistan      &lt;NA&gt;
+## 26   74.03887 36.82573     2    26 Afghanistan      &lt;NA&gt;
+## 27   74.00185 36.82310     2    27 Afghanistan      &lt;NA&gt;
+## 28   73.90781 36.85293     2    28 Afghanistan      &lt;NA&gt;
+## 29   73.76914 36.88848     2    29 Afghanistan      &lt;NA&gt;
+## 30   73.73183 36.88779     2    30 Afghanistan      &lt;NA&gt;
+## 31   73.41113 36.88169     2    31 Afghanistan      &lt;NA&gt;
+## 32   73.11680 36.86856     2    32 Afghanistan      &lt;NA&gt;
+## 33   72.99374 36.85161     2    33 Afghanistan      &lt;NA&gt;
+## 34   72.76621 36.83501     2    34 Afghanistan      &lt;NA&gt;
+## 35   72.62286 36.82959     2    35 Afghanistan      &lt;NA&gt;
+## 36   72.53135 36.80200     2    36 Afghanistan      &lt;NA&gt;
+## 37   72.43115 36.76582     2    37 Afghanistan      &lt;NA&gt;
+## 38   72.32696 36.74239     2    38 Afghanistan      &lt;NA&gt;
+## 39   72.24980 36.73472     2    39 Afghanistan      &lt;NA&gt;
+## 40   72.15674 36.70088     2    40 Afghanistan      &lt;NA&gt;
+## 41   72.09560 36.63374     2    41 Afghanistan      &lt;NA&gt;
+## 42   71.92070 36.53418     2    42 Afghanistan      &lt;NA&gt;
+## 43   71.82227 36.48608     2    43 Afghanistan      &lt;NA&gt;
+## 44   71.77266 36.43184     2    44 Afghanistan      &lt;NA&gt;
+## 45   71.71641 36.42656     2    45 Afghanistan      &lt;NA&gt;
+## 46   71.62051 36.43647     2    46 Afghanistan      &lt;NA&gt;
+## 47   71.54590 36.37769     2    47 Afghanistan      &lt;NA&gt;
+## 48   71.46328 36.29326     2    48 Afghanistan      &lt;NA&gt;
+## 49   71.31260 36.17119     2    49 Afghanistan      &lt;NA&gt;
+## 50   71.23291 36.12178     2    50 Afghanistan      &lt;NA&gt;
+## 51   71.18506 36.04209     2    51 Afghanistan      &lt;NA&gt;
+## 52   71.22021 36.00068     2    52 Afghanistan      &lt;NA&gt;
+## 53   71.34287 35.93853     2    53 Afghanistan      &lt;NA&gt;
+## 54   71.39756 35.88018     2    54 Afghanistan      &lt;NA&gt;
+## 55   71.42754 35.83374     2    55 Afghanistan      &lt;NA&gt;
+## 56   71.48359 35.71460     2    56 Afghanistan      &lt;NA&gt;
+## 57   71.51904 35.59751     2    57 Afghanistan      &lt;NA&gt;
+## 58   71.57198 35.54683     2    58 Afghanistan      &lt;NA&gt;
+## 59   71.58740 35.46084     2    59 Afghanistan      &lt;NA&gt;
+## 60   71.60059 35.40791     2    60 Afghanistan      &lt;NA&gt;
+## 61   71.57198 35.37041     2    61 Afghanistan      &lt;NA&gt;
+## 62   71.54551 35.32851     2    62 Afghanistan      &lt;NA&gt;
+## 63   71.54551 35.28886     2    63 Afghanistan      &lt;NA&gt;
+## 64   71.57725 35.24800     2    64 Afghanistan      &lt;NA&gt;
+## 65   71.60527 35.21177     2    65 Afghanistan      &lt;NA&gt;
+## 66   71.62051 35.18301     2    66 Afghanistan      &lt;NA&gt;
+## 67   71.60166 35.15068     2    67 Afghanistan      &lt;NA&gt;
+## 68   71.54551 35.10141     2    68 Afghanistan      &lt;NA&gt;
+## 69   71.51709 35.05112     2    69 Afghanistan      &lt;NA&gt;
+## 70   71.45508 34.96694     2    70 Afghanistan      &lt;NA&gt;
+## 71   71.35811 34.90962     2    71 Afghanistan      &lt;NA&gt;
+## 72   71.29414 34.86773     2    72 Afghanistan      &lt;NA&gt;
+## 73   71.22578 34.77954     2    73 Afghanistan      &lt;NA&gt;
+## 74   71.11328 34.68159     2    74 Afghanistan      &lt;NA&gt;
+## 75   71.06563 34.59961     2    75 Afghanistan      &lt;NA&gt;
+## 76   71.01631 34.55464     2    76 Afghanistan      &lt;NA&gt;
+## 77   70.96562 34.53037     2    77 Afghanistan      &lt;NA&gt;
+## 78   70.97891 34.48628     2    78 Afghanistan      &lt;NA&gt;
+## 79   71.02295 34.43115     2    79 Afghanistan      &lt;NA&gt;
+## 80   71.09570 34.36943     2    80 Afghanistan      &lt;NA&gt;
+## 81   71.09238 34.27324     2    81 Afghanistan      &lt;NA&gt;
+## 82   71.08906 34.20406     2    82 Afghanistan      &lt;NA&gt;
+## 83   71.09131 34.12027     2    83 Afghanistan      &lt;NA&gt;
+## 84   71.05156 34.04971     2    84 Afghanistan      &lt;NA&gt;
+## 85   70.84844 33.98188     2    85 Afghanistan      &lt;NA&gt;
+## 86   70.65401 33.95229     2    86 Afghanistan      &lt;NA&gt;
+## 87   70.41573 33.95044     2    87 Afghanistan      &lt;NA&gt;
+## 88   70.32568 33.96113     2    88 Afghanistan      &lt;NA&gt;
+## 89   70.25361 33.97598     2    89 Afghanistan      &lt;NA&gt;
+## 90   69.99473 34.05181     2    90 Afghanistan      &lt;NA&gt;
+## 91   69.88965 34.00727     2    91 Afghanistan      &lt;NA&gt;
+## 92   69.86806 33.89766     2    92 Afghanistan      &lt;NA&gt;
+## 93   70.05664 33.71987     2    93 Afghanistan      &lt;NA&gt;
+## 94   70.13418 33.62075     2    94 Afghanistan      &lt;NA&gt;
+## 95   70.21973 33.45469     2    95 Afghanistan      &lt;NA&gt;
+## 96   70.28418 33.36904     2    96 Afghanistan      &lt;NA&gt;
+## 97   70.26113 33.28901     2    97 Afghanistan      &lt;NA&gt;
+## 98   70.09023 33.19810     2    98 Afghanistan      &lt;NA&gt;
+## 99   69.92012 33.11250     2    99 Afghanistan      &lt;NA&gt;
+## 100  69.70371 33.09473     2   100 Afghanistan      &lt;NA&gt;
+## 101  69.56777 33.06416     2   101 Afghanistan      &lt;NA&gt;
+## 102  69.50156 33.02007     2   102 Afghanistan      &lt;NA&gt;
+## 103  69.45312 32.83281     2   103 Afghanistan      &lt;NA&gt;
+## 104  69.40459 32.76426     2   104 Afghanistan      &lt;NA&gt;
+## 105  69.40537 32.68272     2   105 Afghanistan      &lt;NA&gt;
+## 106  69.35947 32.59033     2   106 Afghanistan      &lt;NA&gt;
+## 107  69.28994 32.53057     2   107 Afghanistan      &lt;NA&gt;
+## 108  69.24140 32.43354     2   108 Afghanistan      &lt;NA&gt;
+## 109  69.25654 32.24946     2   109 Afghanistan      &lt;NA&gt;
+## 110  69.27930 31.93682     2   110 Afghanistan      &lt;NA&gt;
+## 111  69.18691 31.83809     2   111 Afghanistan      &lt;NA&gt;
+## 112  69.08311 31.73848     2   112 Afghanistan      &lt;NA&gt;
+## 113  68.97343 31.66738     2   113 Afghanistan      &lt;NA&gt;
+## 114  68.86895 31.63423     2   114 Afghanistan      &lt;NA&gt;
+## 115  68.78233 31.64643     2   115 Afghanistan      &lt;NA&gt;
+## 116  68.71367 31.70806     2   116 Afghanistan      &lt;NA&gt;
+## 117  68.67324 31.75972     2   117 Afghanistan      &lt;NA&gt;
+## 118  68.59766 31.80298     2   118 Afghanistan      &lt;NA&gt;
+## 119  68.52071 31.79414     2   119 Afghanistan      &lt;NA&gt;
+## 120  68.44326 31.75449     2   120 Afghanistan      &lt;NA&gt;
+## 121  68.31982 31.76767     2   121 Afghanistan      &lt;NA&gt;
+## 122  68.21397 31.80737     2   122 Afghanistan      &lt;NA&gt;
+## 123  68.16103 31.80298     2   123 Afghanistan      &lt;NA&gt;
+## 124  68.13017 31.76328     2   124 Afghanistan      &lt;NA&gt;
+## 125  68.01719 31.67798     2   125 Afghanistan      &lt;NA&gt;
+## 126  67.73985 31.54819     2   126 Afghanistan      &lt;NA&gt;
+## 127  67.62675 31.53877     2   127 Afghanistan      &lt;NA&gt;
+## 128  67.57822 31.50649     2   128 Afghanistan      &lt;NA&gt;
+## 129  67.59756 31.45332     2   129 Afghanistan      &lt;NA&gt;
+## 130  67.64706 31.40996     2   130 Afghanistan      &lt;NA&gt;
+## 131  67.73350 31.37925     2   131 Afghanistan      &lt;NA&gt;
+## 132  67.73789 31.34395     2   132 Afghanistan      &lt;NA&gt;
+## 133  67.66152 31.31299     2   133 Afghanistan      &lt;NA&gt;
+## 134  67.59639 31.27769     2   134 Afghanistan      &lt;NA&gt;
+## 135  67.45283 31.23462     2   135 Afghanistan      &lt;NA&gt;
+## 136  67.28730 31.21782     2   136 Afghanistan      &lt;NA&gt;
+## 137  67.11592 31.24292     2   137 Afghanistan      &lt;NA&gt;
+## 138  67.02773 31.30024     2   138 Afghanistan      &lt;NA&gt;
+## 139  66.92432 31.30561     2   139 Afghanistan      &lt;NA&gt;
+## 140  66.82929 31.26367     2   140 Afghanistan      &lt;NA&gt;
+## 141  66.73135 31.19453     2   141 Afghanistan      &lt;NA&gt;
+## 142  66.62422 31.04604     2   142 Afghanistan      &lt;NA&gt;
+## 143  66.59580 31.01997     2   143 Afghanistan      &lt;NA&gt;
+## 144  66.56680 30.99658     2   144 Afghanistan      &lt;NA&gt;
+## 145  66.49736 30.96455     2   145 Afghanistan      &lt;NA&gt;
+## 146  66.39717 30.91221     2   146 Afghanistan      &lt;NA&gt;
+## 147  66.34687 30.80278     2   147 Afghanistan      &lt;NA&gt;
+## 148  66.28691 30.60791     2   148 Afghanistan      &lt;NA&gt;
+## 149  66.30097 30.50298     2   149 Afghanistan      &lt;NA&gt;
+## 150  66.30547 30.32114     2   150 Afghanistan      &lt;NA&gt;
+## 151  66.28184 30.19346     2   151 Afghanistan      &lt;NA&gt;
+## 152  66.23848 30.10962     2   152 Afghanistan      &lt;NA&gt;
+## 153  66.24717 30.04351     2   153 Afghanistan      &lt;NA&gt;
+## 154  66.31338 29.96856     2   154 Afghanistan      &lt;NA&gt;
+## 155  66.28691 29.92002     2   155 Afghanistan      &lt;NA&gt;
+## 156  66.23125 29.86572     2   156 Afghanistan      &lt;NA&gt;
+## 157  66.17706 29.83559     2   157 Afghanistan      &lt;NA&gt;
+## 158  65.96162 29.77891     2   158 Afghanistan      &lt;NA&gt;
+## 159  65.66621 29.70132     2   159 Afghanistan      &lt;NA&gt;
+## 160  65.47099 29.65156     2   160 Afghanistan      &lt;NA&gt;
+## 161  65.18047 29.57763     2   161 Afghanistan      &lt;NA&gt;
+## 162  65.09550 29.55947     2   162 Afghanistan      &lt;NA&gt;
+## 163  64.91895 29.55278     2   163 Afghanistan      &lt;NA&gt;
+## 164  64.82734 29.56416     2   164 Afghanistan      &lt;NA&gt;
+## 165  64.70351 29.56714     2   165 Afghanistan      &lt;NA&gt;
+## 166  64.52110 29.56450     2   166 Afghanistan      &lt;NA&gt;
+## 167  64.39375 29.54433     2   167 Afghanistan      &lt;NA&gt;
+##  [ reached 'max' / getOption("max.print") -- omitted 99172 rows ]
+```
+
+---
+
+
+
+```r
+knitr::knit_exit()
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"slideNumberFormat": "<div class=\"progress-bar-container\">   <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">   </div> </div>"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
