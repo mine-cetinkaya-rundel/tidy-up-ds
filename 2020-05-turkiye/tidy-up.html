@@ -69,7 +69,7 @@ Bu görselleştirmeyi nasıl geliştirirsiniz?
 
 --
 
-- Kıta düzeyinde görselleştirme
+- Kıtalara göre görselleştirme
 - Haritalama
 
 ---
@@ -590,21 +590,21 @@ Aşağıdaki kod ne yapar?
 
 ```r
 balikcilik &lt;- balikcilik %&gt;%
-  mutate(uretim_yuzde = uretim / toplam)
+  mutate(uretim_orani = uretim / toplam)
 ```
 
 ---
 
-## Kıta düzeyinde özetleme
+## Kıtalara göre özetleme
 
 
 ```r
 balikcilik_ozet &lt;- balikcilik %&gt;%
   group_by(kita) %&gt;%
   summarise(
-    uretim_yuzde_min = min(uretim_yuzde),
-    uretim_yuzde_ort = mean(uretim_yuzde),
-    uretim_yuzde_max = max(uretim_yuzde)
+    uretim_orani_min = min(uretim_orani),
+    uretim_orani_ort = mean(uretim_orani),
+    uretim_orani_max = max(uretim_orani)
   ) 
 
 balikcilik_ozet
@@ -612,7 +612,7 @@ balikcilik_ozet
 
 ```
 ## # A tibble: 5 x 4
-##   kita     uretim_yuzde_min uretim_yuzde_ort uretim_yuzde_max
+##   kita     uretim_orani_min uretim_orani_ort uretim_orani_max
 ## * &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
 ## 1 Africa            0                 0.0943            0.803
 ## 2 Americas          0                 0.192             0.529
@@ -623,15 +623,15 @@ balikcilik_ozet
 
 ---
 
-## Kıta düzeyindeyinde görselleştirme
+## Kıtalara göre görselleştirme
 
 
 ```r
-ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
+ggplot(balikcilik_ozet, aes(x = kita, y = uretim_orani_ort)) +
   geom_col()
 ```
 
-&lt;img src="tidy-up_files/figure-html/unnamed-chunk-37-1.png" width="2100" /&gt;
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-30-1.png" width="2100" /&gt;
 
 ---
 
@@ -640,26 +640,26 @@ ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
 
 ```r
 ggplot(balikcilik_ozet, 
-*      aes(y = fct_reorder(kita, uretim_yuzde_ort),
-           x = uretim_yuzde_ort)) +
+*      aes(y = fct_reorder(kita, uretim_orani_ort),
+           x = uretim_orani_ort)) +
   geom_col() +
 * scale_x_continuous(labels = percent) +
-  labs(
-    x = NULL, y = NULL,
-    title = "Su ürünleri yetiştiriciliği",
-    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
-    caption = "Kaynak: bit.ly/2VrawTt"
-  ) +
-  theme_minimal()
+* labs(
+*   x = NULL, y = NULL,
+*   title = "Su ürünleri yetiştiriciliği oranı",
+*   subtitle = "kıta ortalamaları, 2016",
+*   caption = "Kaynak: bit.ly/2VrawTt"
+* ) +
+* theme_minimal()
 ```
 
 ---
 
-&lt;img src="tidy-up_files/figure-html/unnamed-chunk-38-1.png" width="1500" /&gt;
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-31-1.png" width="2100" /&gt;
 
 ---
 
-## Tablo oluşturma
+## Veri çerçevesi oluşturma
 
 .pull-left[
 
@@ -698,16 +698,16 @@ kita_ceviri
 ```r
 balikcilik_ozet %&gt;%
 * left_join(kita_ceviri) %&gt;%
-  ggplot(aes(y = fct_reorder(kita_turkce, uretim_yuzde_ort),
-             x = uretim_yuzde_ort)) +
+  ggplot(aes(y = fct_reorder(kita_turkce, uretim_orani_ort),
+             x = uretim_orani_ort)) +
   geom_col() +
   scale_x_continuous(
 *   labels = percent_format(prefix = "%", suffix = NULL)
     ) + 
   labs(
     x = NULL, y = NULL,
-    title = "Su ürünleri yetiştiriciliği",
-    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    title = "Su ürünleri yetiştiriciliği oranı",
+    subtitle = "kıta ortalamaları, 2016",
     caption = "Kaynak: bit.ly/2VrawTt"
   ) +
   theme_minimal()
@@ -719,7 +719,7 @@ balikcilik_ozet %&gt;%
 
 ---
 
-&lt;img src="tidy-up_files/figure-html/bar-chart-improve-translate-1.png" width="1500" /&gt;
+&lt;img src="tidy-up_files/figure-html/bar-chart-improve-translate-1.png" width="2100" /&gt;
 
 ---
 
@@ -731,200 +731,546 @@ class: middle
 
 ## Balıkçılık verilerini haritalama
 
-- Ülke sınırlarını data frame olarak saklayın
-- `balikcilik` data frame'ini ülke sinirlari data frame'i ile birleştirelim
-- Ülke sınırlarını çizip iclerini su ürünleri yetiştiriciliği payıyla dolduralım
+- Ülke sınırlarını veri çerçevesi olarak kaydet
+- `balikcilik` veri çerçevesini ülke sinirlari veri çerçevesi ile birleştir
+- Ülke sınırlarını çizip içlerini su ürünleri yetiştiriciliği oranıyla doldur
 
 
 ---
 
 ## `map_data()`
 
-`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir data frame'e çevirir:
+`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir veri çerçevesine çevirir:
+
+
+```r
+map_data("world") %&gt;% slice(1:15)
+```
+
+```
+##         long      lat group order      region subregion
+## 1  -69.89912 12.45200     1     1       Aruba      &lt;NA&gt;
+## 2  -69.89571 12.42300     1     2       Aruba      &lt;NA&gt;
+## 3  -69.94219 12.43853     1     3       Aruba      &lt;NA&gt;
+## 4  -70.00415 12.50049     1     4       Aruba      &lt;NA&gt;
+## 5  -70.06612 12.54697     1     5       Aruba      &lt;NA&gt;
+## 6  -70.05088 12.59707     1     6       Aruba      &lt;NA&gt;
+## 7  -70.03511 12.61411     1     7       Aruba      &lt;NA&gt;
+## 8  -69.97314 12.56763     1     8       Aruba      &lt;NA&gt;
+## 9  -69.91181 12.48047     1     9       Aruba      &lt;NA&gt;
+## 10 -69.89912 12.45200     1    10       Aruba      &lt;NA&gt;
+## 11  74.89131 37.23164     2    12 Afghanistan      &lt;NA&gt;
+## 12  74.84023 37.22505     2    13 Afghanistan      &lt;NA&gt;
+## 13  74.76738 37.24917     2    14 Afghanistan      &lt;NA&gt;
+## 14  74.73896 37.28564     2    15 Afghanistan      &lt;NA&gt;
+## 15  74.72666 37.29072     2    16 Afghanistan      &lt;NA&gt;
+```
+
+---
+
+## Veri çerçeveleri: `data.frame` 
 
 
 ```r
 map_data("world")
 ```
 
+
 ```
-##          long      lat group order      region subregion
-## 1   -69.89912 12.45200     1     1       Aruba      &lt;NA&gt;
-## 2   -69.89571 12.42300     1     2       Aruba      &lt;NA&gt;
-## 3   -69.94219 12.43853     1     3       Aruba      &lt;NA&gt;
-## 4   -70.00415 12.50049     1     4       Aruba      &lt;NA&gt;
-## 5   -70.06612 12.54697     1     5       Aruba      &lt;NA&gt;
-## 6   -70.05088 12.59707     1     6       Aruba      &lt;NA&gt;
-## 7   -70.03511 12.61411     1     7       Aruba      &lt;NA&gt;
-## 8   -69.97314 12.56763     1     8       Aruba      &lt;NA&gt;
-## 9   -69.91181 12.48047     1     9       Aruba      &lt;NA&gt;
-## 10  -69.89912 12.45200     1    10       Aruba      &lt;NA&gt;
-## 12   74.89131 37.23164     2    12 Afghanistan      &lt;NA&gt;
-## 13   74.84023 37.22505     2    13 Afghanistan      &lt;NA&gt;
-## 14   74.76738 37.24917     2    14 Afghanistan      &lt;NA&gt;
-## 15   74.73896 37.28564     2    15 Afghanistan      &lt;NA&gt;
-## 16   74.72666 37.29072     2    16 Afghanistan      &lt;NA&gt;
-## 17   74.66895 37.26670     2    17 Afghanistan      &lt;NA&gt;
-## 18   74.55899 37.23662     2    18 Afghanistan      &lt;NA&gt;
-## 19   74.37217 37.15771     2    19 Afghanistan      &lt;NA&gt;
-## 20   74.37617 37.13735     2    20 Afghanistan      &lt;NA&gt;
-## 21   74.49796 37.05722     2    21 Afghanistan      &lt;NA&gt;
-## 22   74.52646 37.03066     2    22 Afghanistan      &lt;NA&gt;
-## 23   74.54140 37.02217     2    23 Afghanistan      &lt;NA&gt;
-## 24   74.43106 36.98369     2    24 Afghanistan      &lt;NA&gt;
-## 25   74.19473 36.89688     2    25 Afghanistan      &lt;NA&gt;
-## 26   74.03887 36.82573     2    26 Afghanistan      &lt;NA&gt;
-## 27   74.00185 36.82310     2    27 Afghanistan      &lt;NA&gt;
-## 28   73.90781 36.85293     2    28 Afghanistan      &lt;NA&gt;
-## 29   73.76914 36.88848     2    29 Afghanistan      &lt;NA&gt;
-## 30   73.73183 36.88779     2    30 Afghanistan      &lt;NA&gt;
-## 31   73.41113 36.88169     2    31 Afghanistan      &lt;NA&gt;
-## 32   73.11680 36.86856     2    32 Afghanistan      &lt;NA&gt;
-## 33   72.99374 36.85161     2    33 Afghanistan      &lt;NA&gt;
-## 34   72.76621 36.83501     2    34 Afghanistan      &lt;NA&gt;
-## 35   72.62286 36.82959     2    35 Afghanistan      &lt;NA&gt;
-## 36   72.53135 36.80200     2    36 Afghanistan      &lt;NA&gt;
-## 37   72.43115 36.76582     2    37 Afghanistan      &lt;NA&gt;
-## 38   72.32696 36.74239     2    38 Afghanistan      &lt;NA&gt;
-## 39   72.24980 36.73472     2    39 Afghanistan      &lt;NA&gt;
-## 40   72.15674 36.70088     2    40 Afghanistan      &lt;NA&gt;
-## 41   72.09560 36.63374     2    41 Afghanistan      &lt;NA&gt;
-## 42   71.92070 36.53418     2    42 Afghanistan      &lt;NA&gt;
-## 43   71.82227 36.48608     2    43 Afghanistan      &lt;NA&gt;
-## 44   71.77266 36.43184     2    44 Afghanistan      &lt;NA&gt;
-## 45   71.71641 36.42656     2    45 Afghanistan      &lt;NA&gt;
-## 46   71.62051 36.43647     2    46 Afghanistan      &lt;NA&gt;
-## 47   71.54590 36.37769     2    47 Afghanistan      &lt;NA&gt;
-## 48   71.46328 36.29326     2    48 Afghanistan      &lt;NA&gt;
-## 49   71.31260 36.17119     2    49 Afghanistan      &lt;NA&gt;
-## 50   71.23291 36.12178     2    50 Afghanistan      &lt;NA&gt;
-## 51   71.18506 36.04209     2    51 Afghanistan      &lt;NA&gt;
-## 52   71.22021 36.00068     2    52 Afghanistan      &lt;NA&gt;
-## 53   71.34287 35.93853     2    53 Afghanistan      &lt;NA&gt;
-## 54   71.39756 35.88018     2    54 Afghanistan      &lt;NA&gt;
-## 55   71.42754 35.83374     2    55 Afghanistan      &lt;NA&gt;
-## 56   71.48359 35.71460     2    56 Afghanistan      &lt;NA&gt;
-## 57   71.51904 35.59751     2    57 Afghanistan      &lt;NA&gt;
-## 58   71.57198 35.54683     2    58 Afghanistan      &lt;NA&gt;
-## 59   71.58740 35.46084     2    59 Afghanistan      &lt;NA&gt;
-## 60   71.60059 35.40791     2    60 Afghanistan      &lt;NA&gt;
-## 61   71.57198 35.37041     2    61 Afghanistan      &lt;NA&gt;
-## 62   71.54551 35.32851     2    62 Afghanistan      &lt;NA&gt;
-## 63   71.54551 35.28886     2    63 Afghanistan      &lt;NA&gt;
-## 64   71.57725 35.24800     2    64 Afghanistan      &lt;NA&gt;
-## 65   71.60527 35.21177     2    65 Afghanistan      &lt;NA&gt;
-## 66   71.62051 35.18301     2    66 Afghanistan      &lt;NA&gt;
-## 67   71.60166 35.15068     2    67 Afghanistan      &lt;NA&gt;
-## 68   71.54551 35.10141     2    68 Afghanistan      &lt;NA&gt;
-## 69   71.51709 35.05112     2    69 Afghanistan      &lt;NA&gt;
-## 70   71.45508 34.96694     2    70 Afghanistan      &lt;NA&gt;
-## 71   71.35811 34.90962     2    71 Afghanistan      &lt;NA&gt;
-## 72   71.29414 34.86773     2    72 Afghanistan      &lt;NA&gt;
-## 73   71.22578 34.77954     2    73 Afghanistan      &lt;NA&gt;
-## 74   71.11328 34.68159     2    74 Afghanistan      &lt;NA&gt;
-## 75   71.06563 34.59961     2    75 Afghanistan      &lt;NA&gt;
-## 76   71.01631 34.55464     2    76 Afghanistan      &lt;NA&gt;
-## 77   70.96562 34.53037     2    77 Afghanistan      &lt;NA&gt;
-## 78   70.97891 34.48628     2    78 Afghanistan      &lt;NA&gt;
-## 79   71.02295 34.43115     2    79 Afghanistan      &lt;NA&gt;
-## 80   71.09570 34.36943     2    80 Afghanistan      &lt;NA&gt;
-## 81   71.09238 34.27324     2    81 Afghanistan      &lt;NA&gt;
-## 82   71.08906 34.20406     2    82 Afghanistan      &lt;NA&gt;
-## 83   71.09131 34.12027     2    83 Afghanistan      &lt;NA&gt;
-## 84   71.05156 34.04971     2    84 Afghanistan      &lt;NA&gt;
-## 85   70.84844 33.98188     2    85 Afghanistan      &lt;NA&gt;
-## 86   70.65401 33.95229     2    86 Afghanistan      &lt;NA&gt;
-## 87   70.41573 33.95044     2    87 Afghanistan      &lt;NA&gt;
-## 88   70.32568 33.96113     2    88 Afghanistan      &lt;NA&gt;
-## 89   70.25361 33.97598     2    89 Afghanistan      &lt;NA&gt;
-## 90   69.99473 34.05181     2    90 Afghanistan      &lt;NA&gt;
-## 91   69.88965 34.00727     2    91 Afghanistan      &lt;NA&gt;
-## 92   69.86806 33.89766     2    92 Afghanistan      &lt;NA&gt;
-## 93   70.05664 33.71987     2    93 Afghanistan      &lt;NA&gt;
-## 94   70.13418 33.62075     2    94 Afghanistan      &lt;NA&gt;
-## 95   70.21973 33.45469     2    95 Afghanistan      &lt;NA&gt;
-## 96   70.28418 33.36904     2    96 Afghanistan      &lt;NA&gt;
-## 97   70.26113 33.28901     2    97 Afghanistan      &lt;NA&gt;
-## 98   70.09023 33.19810     2    98 Afghanistan      &lt;NA&gt;
-## 99   69.92012 33.11250     2    99 Afghanistan      &lt;NA&gt;
-## 100  69.70371 33.09473     2   100 Afghanistan      &lt;NA&gt;
-## 101  69.56777 33.06416     2   101 Afghanistan      &lt;NA&gt;
-## 102  69.50156 33.02007     2   102 Afghanistan      &lt;NA&gt;
-## 103  69.45312 32.83281     2   103 Afghanistan      &lt;NA&gt;
-## 104  69.40459 32.76426     2   104 Afghanistan      &lt;NA&gt;
-## 105  69.40537 32.68272     2   105 Afghanistan      &lt;NA&gt;
-## 106  69.35947 32.59033     2   106 Afghanistan      &lt;NA&gt;
-## 107  69.28994 32.53057     2   107 Afghanistan      &lt;NA&gt;
-## 108  69.24140 32.43354     2   108 Afghanistan      &lt;NA&gt;
-## 109  69.25654 32.24946     2   109 Afghanistan      &lt;NA&gt;
-## 110  69.27930 31.93682     2   110 Afghanistan      &lt;NA&gt;
-## 111  69.18691 31.83809     2   111 Afghanistan      &lt;NA&gt;
-## 112  69.08311 31.73848     2   112 Afghanistan      &lt;NA&gt;
-## 113  68.97343 31.66738     2   113 Afghanistan      &lt;NA&gt;
-## 114  68.86895 31.63423     2   114 Afghanistan      &lt;NA&gt;
-## 115  68.78233 31.64643     2   115 Afghanistan      &lt;NA&gt;
-## 116  68.71367 31.70806     2   116 Afghanistan      &lt;NA&gt;
-## 117  68.67324 31.75972     2   117 Afghanistan      &lt;NA&gt;
-## 118  68.59766 31.80298     2   118 Afghanistan      &lt;NA&gt;
-## 119  68.52071 31.79414     2   119 Afghanistan      &lt;NA&gt;
-## 120  68.44326 31.75449     2   120 Afghanistan      &lt;NA&gt;
-## 121  68.31982 31.76767     2   121 Afghanistan      &lt;NA&gt;
-## 122  68.21397 31.80737     2   122 Afghanistan      &lt;NA&gt;
-## 123  68.16103 31.80298     2   123 Afghanistan      &lt;NA&gt;
-## 124  68.13017 31.76328     2   124 Afghanistan      &lt;NA&gt;
-## 125  68.01719 31.67798     2   125 Afghanistan      &lt;NA&gt;
-## 126  67.73985 31.54819     2   126 Afghanistan      &lt;NA&gt;
-## 127  67.62675 31.53877     2   127 Afghanistan      &lt;NA&gt;
-## 128  67.57822 31.50649     2   128 Afghanistan      &lt;NA&gt;
-## 129  67.59756 31.45332     2   129 Afghanistan      &lt;NA&gt;
-## 130  67.64706 31.40996     2   130 Afghanistan      &lt;NA&gt;
-## 131  67.73350 31.37925     2   131 Afghanistan      &lt;NA&gt;
-## 132  67.73789 31.34395     2   132 Afghanistan      &lt;NA&gt;
-## 133  67.66152 31.31299     2   133 Afghanistan      &lt;NA&gt;
-## 134  67.59639 31.27769     2   134 Afghanistan      &lt;NA&gt;
-## 135  67.45283 31.23462     2   135 Afghanistan      &lt;NA&gt;
-## 136  67.28730 31.21782     2   136 Afghanistan      &lt;NA&gt;
-## 137  67.11592 31.24292     2   137 Afghanistan      &lt;NA&gt;
-## 138  67.02773 31.30024     2   138 Afghanistan      &lt;NA&gt;
-## 139  66.92432 31.30561     2   139 Afghanistan      &lt;NA&gt;
-## 140  66.82929 31.26367     2   140 Afghanistan      &lt;NA&gt;
-## 141  66.73135 31.19453     2   141 Afghanistan      &lt;NA&gt;
-## 142  66.62422 31.04604     2   142 Afghanistan      &lt;NA&gt;
-## 143  66.59580 31.01997     2   143 Afghanistan      &lt;NA&gt;
-## 144  66.56680 30.99658     2   144 Afghanistan      &lt;NA&gt;
-## 145  66.49736 30.96455     2   145 Afghanistan      &lt;NA&gt;
-## 146  66.39717 30.91221     2   146 Afghanistan      &lt;NA&gt;
-## 147  66.34687 30.80278     2   147 Afghanistan      &lt;NA&gt;
-## 148  66.28691 30.60791     2   148 Afghanistan      &lt;NA&gt;
-## 149  66.30097 30.50298     2   149 Afghanistan      &lt;NA&gt;
-## 150  66.30547 30.32114     2   150 Afghanistan      &lt;NA&gt;
-## 151  66.28184 30.19346     2   151 Afghanistan      &lt;NA&gt;
-## 152  66.23848 30.10962     2   152 Afghanistan      &lt;NA&gt;
-## 153  66.24717 30.04351     2   153 Afghanistan      &lt;NA&gt;
-## 154  66.31338 29.96856     2   154 Afghanistan      &lt;NA&gt;
-## 155  66.28691 29.92002     2   155 Afghanistan      &lt;NA&gt;
-## 156  66.23125 29.86572     2   156 Afghanistan      &lt;NA&gt;
-## 157  66.17706 29.83559     2   157 Afghanistan      &lt;NA&gt;
-## 158  65.96162 29.77891     2   158 Afghanistan      &lt;NA&gt;
-## 159  65.66621 29.70132     2   159 Afghanistan      &lt;NA&gt;
-## 160  65.47099 29.65156     2   160 Afghanistan      &lt;NA&gt;
-## 161  65.18047 29.57763     2   161 Afghanistan      &lt;NA&gt;
-## 162  65.09550 29.55947     2   162 Afghanistan      &lt;NA&gt;
-## 163  64.91895 29.55278     2   163 Afghanistan      &lt;NA&gt;
-## 164  64.82734 29.56416     2   164 Afghanistan      &lt;NA&gt;
-## 165  64.70351 29.56714     2   165 Afghanistan      &lt;NA&gt;
-## 166  64.52110 29.56450     2   166 Afghanistan      &lt;NA&gt;
-## 167  64.39375 29.54433     2   167 Afghanistan      &lt;NA&gt;
-##  [ reached 'max' / getOption("max.print") -- omitted 99172 rows ]
+##         long      lat group order      region subregion
+## 1  -69.89912 12.45200     1     1       Aruba      &lt;NA&gt;
+## 2  -69.89571 12.42300     1     2       Aruba      &lt;NA&gt;
+## 3  -69.94219 12.43853     1     3       Aruba      &lt;NA&gt;
+## 4  -70.00415 12.50049     1     4       Aruba      &lt;NA&gt;
+## 5  -70.06612 12.54697     1     5       Aruba      &lt;NA&gt;
+## 6  -70.05088 12.59707     1     6       Aruba      &lt;NA&gt;
+## 7  -70.03511 12.61411     1     7       Aruba      &lt;NA&gt;
+## 8  -69.97314 12.56763     1     8       Aruba      &lt;NA&gt;
+## 9  -69.91181 12.48047     1     9       Aruba      &lt;NA&gt;
+## 10 -69.89912 12.45200     1    10       Aruba      &lt;NA&gt;
+## 12  74.89131 37.23164     2    12 Afghanistan      &lt;NA&gt;
+## 13  74.84023 37.22505     2    13 Afghanistan      &lt;NA&gt;
+## 14  74.76738 37.24917     2    14 Afghanistan      &lt;NA&gt;
+## 15  74.73896 37.28564     2    15 Afghanistan      &lt;NA&gt;
+## 16  74.72666 37.29072     2    16 Afghanistan      &lt;NA&gt;
+## 17  74.66895 37.26670     2    17 Afghanistan      &lt;NA&gt;
+## 18  74.55899 37.23662     2    18 Afghanistan      &lt;NA&gt;
+## 19  74.37217 37.15771     2    19 Afghanistan      &lt;NA&gt;
+## 20  74.37617 37.13735     2    20 Afghanistan      &lt;NA&gt;
+## 21  74.49796 37.05722     2    21 Afghanistan      &lt;NA&gt;
 ```
 
 ---
 
+## Veri çerçeveleri: `tibble`
 
 
 ```r
-knitr::knit_exit()
+map_data("world") %&gt;% as_tibble()
 ```
+
+```
+## # A tibble: 99,338 x 6
+##     long   lat group order region subregion
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;    
+##  1 -69.9  12.5     1     1 Aruba  &lt;NA&gt;     
+##  2 -69.9  12.4     1     2 Aruba  &lt;NA&gt;     
+##  3 -69.9  12.4     1     3 Aruba  &lt;NA&gt;     
+##  4 -70.0  12.5     1     4 Aruba  &lt;NA&gt;     
+##  5 -70.1  12.5     1     5 Aruba  &lt;NA&gt;     
+##  6 -70.1  12.6     1     6 Aruba  &lt;NA&gt;     
+##  7 -70.0  12.6     1     7 Aruba  &lt;NA&gt;     
+##  8 -70.0  12.6     1     8 Aruba  &lt;NA&gt;     
+##  9 -69.9  12.5     1     9 Aruba  &lt;NA&gt;     
+## 10 -69.9  12.5     1    10 Aruba  &lt;NA&gt;     
+## # … with 99,328 more rows
+```
+
+---
+
+## Daha iyi eşleşme için birkaç düzeltme
+
+.question[
+Aşağıdaki kod ne yapar?
+]
+
+
+```r
+dunya_haritasi &lt;- map_data("world") %&gt;%
+  as_tibble() %&gt;%
+  mutate(region = case_when(
+    region == "UK"           ~ "United Kingdom",
+    region == "USA"          ~ "United States",
+    subregion == "Hong Kong" ~ "Hong Kong",
+    TRUE                     ~ region
+    )
+  )
+```
+
+---
+
+## Dünya haritası
+
+.midi[
+
+```r
+ggplot(dunya_haritasi, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "gray") +
+  theme_minimal()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-34-1.png" width="2100" /&gt;
+]
+
+---
+
+## Balıkçılık ve dunya haritası veri çerçevelerini birleştirelim
+
+.pull-left[
+
+```r
+balikcilik %&gt;% select(ulke)
+```
+
+```
+## # A tibble: 82 x 1
+##    ulke      
+##    &lt;chr&gt;     
+##  1 Angola    
+##  2 Argentina 
+##  3 Australia 
+##  4 Bangladesh
+##  5 Brazil    
+##  6 Cambodia  
+##  7 Cameroon  
+##  8 Canada    
+##  9 Chad      
+## 10 Chile     
+## # … with 72 more rows
+```
+]
+.pull-right[
+
+```r
+dunya_haritasi %&gt;% select(region)
+```
+
+```
+## # A tibble: 99,338 x 1
+##    region
+##    &lt;chr&gt; 
+##  1 Aruba 
+##  2 Aruba 
+##  3 Aruba 
+##  4 Aruba 
+##  5 Aruba 
+##  6 Aruba 
+##  7 Aruba 
+##  8 Aruba 
+##  9 Aruba 
+## 10 Aruba 
+## # … with 99,328 more rows
+```
+]
+
+---
+
+
+```r
+balikcilik_haritasi &lt;- left_join(balikcilik, dunya_haritasi, 
+                                 by = c("ulke" = "region"))
+```
+
+
+```r
+glimpse(balikcilik_haritasi)
+```
+
+```
+## Rows: 72,685
+## Columns: 11
+## $ ulke         &lt;chr&gt; "Angola", "Angola", "Angola", "Angola", "Angola", "Angola", "Angola", "Ango…
+## $ hasat        &lt;dbl&gt; 486490, 486490, 486490, 486490, 486490, 486490, 486490, 486490, 486490, 486…
+## $ uretim       &lt;dbl&gt; 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, 655, …
+## $ toplam       &lt;dbl&gt; 487145, 487145, 487145, 487145, 487145, 487145, 487145, 487145, 487145, 487…
+## $ kita         &lt;chr&gt; "Africa", "Africa", "Africa", "Africa", "Africa", "Africa", "Africa", "Afri…
+## $ uretim_orani &lt;dbl&gt; 0.001344569, 0.001344569, 0.001344569, 0.001344569, 0.001344569, 0.00134456…
+## $ long         &lt;dbl&gt; 23.96650, 23.98828, 24.01006, 24.02559, 24.04141, 24.04668, 24.02930, 24.01…
+## $ lat          &lt;dbl&gt; -10.87178, -11.00283, -11.18477, -11.31563, -11.37412, -11.40537, -11.43916…
+## $ group        &lt;dbl&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
+## $ order        &lt;int&gt; 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, …
+## $ subregion    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+```
+
+---
+
+## Balıkçılık haritası
+
+.midi[
+
+```r
+ggplot(balikcilik_haritasi, mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = uretim_orani)) +
+  scale_fill_viridis_c() +
+  theme_minimal()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-39-1.png" width="2100" /&gt;
+]
+
+---
+
+.question[
+Aşağıdaki haritada yanıltıcı olan nedir?
+]
+
+.midi[
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-40-1.png" width="2100" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+## Parçaları bir araya getirelim
+
+
+```r
+ggplot() +
+  # 1. katman: bütün ülkelerin sınırları
+* geom_polygon(dunya_haritasi,
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  # 2. katman: balıkçılık verisi olan ülkelerin değerleri
+* geom_polygon(balikcilik_haritasi,
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = uretim_orani)) +
+  scale_fill_viridis_c() +
+  theme_minimal()
+```
+
+---
+
+class: middle
+
+&lt;img src="tidy-up_files/figure-html/uretim-yuzde-haritasi-1.png" width="2100" /&gt;
+
+---
+
+## Görselleștirme geliștirme
+
+
+```r
+ggplot() +
+  geom_polygon(dunya_haritasi,
+               mapping = aes(x = long, y = lat, group = group), 
+               fill = "lightgray") +
+  geom_polygon(balikcilik_haritasi,
+               mapping = aes(x = long, y = lat, group = group, 
+                             fill = uretim_orani)) +
+  scale_fill_viridis_c(
+*   labels = percent_format(suffix = NULL, prefix = "%")
+    ) +  
+  theme_minimal() +
+* theme(legend.position = "bottom") +
+  labs(
+    x = NULL, y = NULL,
+*   fill = "Üretim oranı",
+    title = "Su ürünleri yetiştiriciliği oranı",
+    subtitle = "Toplam balıkçılık değeri 100.000 tonun üzerindeki ülkeler, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
+  )
+```
+
+---
+
+&lt;img src="tidy-up_files/figure-html/uretim-yuzde-haritasi-gelistir-1.png" width="2100" /&gt;
+
+---
+
+background-image: url(img/shubham-sharan-Z-fq3wBVfMU-unsplash.jpg)
+background-position: center
+background-repeat: no-repeat
+background-size: contain
+class: inverse
+
+# Öğretim üyeleri
+
+---
+
+&lt;img src="img/staff-employment.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+Kaynak: [American Association of University Professors (AAUP)](https://www.aaup.org/sites/default/files/files/AAUP_Report_InstrStaff-75-11_apr2013.pdf)
+
+---
+
+## Orjinal veri
+
+- Satirlar: Öğretim üyesi kategorileri
+- Sütunlar: Yıllar
+- Değerler: Her yıl için bu kategorideki öğretim üyelerinin işe alınma oranı
+
+
+```r
+ogretim_uyeleri &lt;- read_csv("data/ogretim-uyeleri.csv")
+ogretim_uyeleri
+```
+
+```
+## # A tibble: 5 x 12
+##   kategori             `1975` `1989` `1993` `1995` `1999` `2001` `2003` `2005` `2007` `2009` `2011`
+##   &lt;chr&gt;                 &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Doçent / Profesör      29     27.6   25     24.8   21.8   20.3   19.3   17.8   17.2   16.8   16.7
+## 2 Yardımcı doçent        16.1   11.4   10.2    9.6    8.9    9.2    8.8    8.2    8      7.6    7.4
+## 3 Okutman                10.3   14.1   13.6   13.6   15.2   15.5   15     14.8   14.9   15.1   15.4
+## 4 Yarı zamanlı öğreti…   24     30.4   33.1   33.2   35.5   36     37     39.3   40.5   41.1   41.3
+## 5 Lisansüstü öğrenci     20.5   16.5   18.1   18.8   18.7   19     20     19.9   19.5   19.4   19.3
+```
+
+---
+
+## İstediğimiz veri
+
+- Satirlar: Fakülte categorileri
+- Sütunlar: Yıllar
+- Değerler: Her yıl için bu kategorideki öğretim üyelerinin işe alınma oranı
+
+&lt;img src="img/wide-to-long.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+class: center, middle
+
+&lt;img src="img/pivot.gif" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## `pivot_*()` fonksiyonlari
+
+![](img/tidyr-longer-wider.gif)&lt;!-- --&gt;
+
+---
+
+## `pivot_longer()`
+
+
+```r
+pivot_longer(data, cols, names_to = "isim", values_to = "deger")
+```
+
+1. `data`
+2. `cols` (pivot edilecek sütunlar) - `kategori` dıșındaki bütün sütunlar
+3. `names_to` (orjinal verideki sütun isimlerinin koyulacağı yeni sütunun ismi) - `yil`
+4. `values_to`(orjinal verideki değerlerin koyulacağı yeni sütunun ismi) - `yuzde`
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun &lt;- ogretim_uyeleri %&gt;%
+  pivot_longer(cols = -kategori, 
+               names_to = "yil", 
+               values_to = "yuzde") %&gt;%
+  mutate(yuzde = as.numeric(yuzde))
+
+ogretim_uyeleri_uzun
+```
+
+```
+## # A tibble: 55 x 3
+##    kategori          yil   yuzde
+##    &lt;chr&gt;             &lt;chr&gt; &lt;dbl&gt;
+##  1 Doçent / Profesör 1975   29  
+##  2 Doçent / Profesör 1989   27.6
+##  3 Doçent / Profesör 1993   25  
+##  4 Doçent / Profesör 1995   24.8
+##  5 Doçent / Profesör 1999   21.8
+##  6 Doçent / Profesör 2001   20.3
+##  7 Doçent / Profesör 2003   19.3
+##  8 Doçent / Profesör 2005   17.8
+##  9 Doçent / Profesör 2007   17.2
+## 10 Doçent / Profesör 2009   16.8
+## # … with 45 more rows
+```
+]
+
+---
+
+.question[
+Bu görselleştirmeyi nasıl düzeltebiliriz?
+]
+
+.small[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  ggplot(aes(x = yuzde, y = yil, 
+             color = kategori)
+         ) +
+  geom_col(position = "dodge")
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-46-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  ggplot(aes(x = yuzde, y = yil, 
+*            fill = kategori)
+         ) +
+  geom_col(position = "dodge")
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-47-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  ggplot(aes(x = yuzde, y = yil, fill = kategori)) +
+  geom_col()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-48-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  ggplot(aes(x = yil, 
+             y = yuzde, group = kategori, color = kategori)) +
+  geom_line() +
+  theme_minimal()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-49-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+* ggplot(aes(x = as.numeric(yil),
+             y = yuzde, group = kategori, color = kategori)) +
+  geom_line() +
+  theme_minimal()
+```
+
+&lt;img src="tidy-up_files/figure-html/unnamed-chunk-50-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+&lt;img src="tidy-up_files/figure-html/ogretim-line-default-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  mutate(yari_zamanli = 
+*          if_else(kategori == "Yarı zamanlı öğretim görevlisi",
+*                  "Yarı zamanlı öğretim görevlisi", "Diğer öğretim üyeleri")) %&gt;%
+  ggplot(aes(x = as.numeric(yil), y = yuzde/100, group = kategori, 
+*            color = yari_zamanli)) +
+  geom_line() +
+  theme_minimal()
+```
+]
+
+---
+
+.midi[
+&lt;img src="tidy-up_files/figure-html/ogretim-line-kirmizi-1.png" width="2100" /&gt;
+]
+
+---
+
+.midi[
+
+```r
+ogretim_uyeleri_uzun %&gt;%
+  mutate(yari_zamanli = if_else(kategori == "Yarı zamanlı öğretim görevlisi", "Yarı zamanlı öğretim görevlisi", "Diğer öğretim üyeleri")) %&gt;%
+  ggplot(aes(x = as.numeric(yil), y = yuzde/100, group = kategori, 
+*            color = fct_rev(yari_zamanli))) +
+  geom_line() +
+* scale_color_manual(values = c("red", "gray")) +
+  scale_y_continuous(
+*   labels = percent_format(accuracy = 1, prefix = "%", suffix = NULL)
+    ) +
+  theme_minimal() +
+* labs(title = "Öğretim üyelerinin ișe alınma trendleri",
+*      x = "Yil", y = "Oran", color = NULL) +
+* theme(legend.position = "bottom")
+```
+]
+
+---
+
+class: middle, center
+
+background-image: url("img/greg-rakozy-oMpAz-DN-9I-unsplash.jpg")
+
+&lt;font color="white" style="bold" size="100px"&gt;Daha fazla bilgi için: tidyverse.org ve &lt;br&gt; rstudio.com/resources/cheatsheets &lt;br&gt; (Türkçe Çeviriler)!&lt;/font&gt;
+
+.footnote[
+Photo by Greg Rakozy on Unsplash.
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

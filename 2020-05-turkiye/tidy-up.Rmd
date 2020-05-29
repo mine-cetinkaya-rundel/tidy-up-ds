@@ -20,7 +20,7 @@ output:
 ```{r child = "setup.Rmd"}
 ```
 
-```{r packages, echo=FALSE, message=FALSE, warning=FALSE}
+```{r paketleri-yukle, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(scales)
 ```
@@ -31,12 +31,12 @@ library(scales)
 - Tidyverse, veri bilimi için tasarlanmış R paketlerinin prensipli bir koleksiyonudur. 
 - Tüm paketler, temel bir tasarım felsefesi, dilbilgisi ve veri yapısı paylaşır.
 <br>
-```{r echo=FALSE,out.width="50%", fig.align="center"}
+```{r img-tidyverse, echo=FALSE,out.width="50%", fig.align="center"}
 knitr::include_graphics("img/tidyverse.png")
 ```
 ]
 .pull-right[
-```{r echo=FALSE, out.width="100%"}
+```{r img-tidyverse-packages, echo=FALSE, out.width="100%"}
 knitr::include_graphics("img/tidyverse-packages.png")
 ```
 ]
@@ -59,7 +59,7 @@ class: inverse
 <br>
 
 .pull-left[
-```{r echo=FALSE, out.width="100%", fig.align="center"}
+```{r img-wikipedia, echo=FALSE, out.width="100%", fig.align="center"}
 knitr::include_graphics("img/fisheries-data.png")
 ```
 ]
@@ -74,20 +74,20 @@ knitr::include_graphics("img/fisheries-data.png")
 Bu görselleştirmeyi nasıl geliştirirsiniz?
 ]
 
-```{r echo=FALSE, out.width="60%", fig.align="center"}
+```{r img-balikcilik-orjinal-gorsel, echo=FALSE, out.width="60%", fig.align="center"}
 knitr::include_graphics("img/fisheries.png")
 ```
 
 --
 
-- Kıta düzeyinde görselleştirme
+- Kıtalara göre görselleştirme
 - Haritalama
 
 ---
 
 ## Veri okuma
 
-```{r}
+```{r veri-oku-balikcilik}
 balikcilik <- read_csv("data/balikcilik.csv")
 names(balikcilik)
 ```
@@ -109,7 +109,7 @@ balikcilik
 Toplam hasadı 100.000 tondan az olan ülkeleri filtreleyerek çıkaralım:
 
 .midi[
-```{r}
+```{r balikcilik-filtre}
 balikcilik <- balikcilik %>%
   filter(toplam > 100000)
 
@@ -122,7 +122,7 @@ balikcilik
 ## Kıta verilerini okuyalım
 
 .small[
-```{r}
+```{r veri-oku-kitalar}
 kitalar <- read_csv("data/kitalar.csv")
 kitalar
 ```
@@ -346,20 +346,20 @@ Aşağıdaki kod ne yapar?
 
 ```{r}
 balikcilik <- balikcilik %>%
-  mutate(uretim_yuzde = uretim / toplam)
+  mutate(uretim_orani = uretim / toplam)
 ```
 
 ---
 
-## Kıta düzeyinde özetleme
+## Kıtalara göre özetleme
 
 ```{r message=FALSE}
 balikcilik_ozet <- balikcilik %>%
   group_by(kita) %>%
   summarise(
-    uretim_yuzde_min = min(uretim_yuzde),
-    uretim_yuzde_ort = mean(uretim_yuzde),
-    uretim_yuzde_max = max(uretim_yuzde)
+    uretim_orani_min = min(uretim_orani),
+    uretim_orani_ort = mean(uretim_orani),
+    uretim_orani_max = max(uretim_orani)
   ) 
 
 balikcilik_ozet
@@ -367,10 +367,10 @@ balikcilik_ozet
 
 ---
 
-## Kıta düzeyindeyinde görselleştirme
+## Kıtalara göre görselleştirme
 
-```{r fig.height=3,fig.width=7}
-ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
+```{r fig.height=3, fig.width=7}
+ggplot(balikcilik_ozet, aes(x = kita, y = uretim_orani_ort)) +
   geom_col()
 ```
 
@@ -380,27 +380,27 @@ ggplot(balikcilik_ozet, aes(x = kita, y = uretim_yuzde_ort)) +
 
 ```{r bar-chart-improve, fig.show = "hide"}
 ggplot(balikcilik_ozet, 
-       aes(y = fct_reorder(kita, uretim_yuzde_ort), #<<
-           x = uretim_yuzde_ort)) +
+       aes(y = fct_reorder(kita, uretim_orani_ort), #<<
+           x = uretim_orani_ort)) +
   geom_col() +
   scale_x_continuous(labels = percent) + #<<
-  labs(
-    x = NULL, y = NULL,
-    title = "Su ürünleri yetiştiriciliği",
-    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
-    caption = "Kaynak: bit.ly/2VrawTt"
-  ) +
-  theme_minimal()
+  labs( #<<
+    x = NULL, y = NULL, #<<
+    title = "Su ürünleri yetiştiriciliği oranı", #<<
+    subtitle = "kıta ortalamaları, 2016", #<<
+    caption = "Kaynak: bit.ly/2VrawTt" #<<
+  ) + #<<
+  theme_minimal() #<<
 ```
 
 ---
 
-```{r ref.label = "bar-chart-improve", echo = FALSE}
+```{r ref.label = "bar-chart-improve", echo = FALSE, fig.height=4, fig.width=7}
 ```
 
 ---
 
-## Tablo oluşturma
+## Veri çerçevesi oluşturma
 
 .pull-left[
 ```{r}
@@ -425,16 +425,16 @@ kita_ceviri
 ```{r bar-chart-improve-translate, fig.show = "hide"}
 balikcilik_ozet %>%
   left_join(kita_ceviri) %>% #<<
-  ggplot(aes(y = fct_reorder(kita_turkce, uretim_yuzde_ort),
-             x = uretim_yuzde_ort)) +
+  ggplot(aes(y = fct_reorder(kita_turkce, uretim_orani_ort),
+             x = uretim_orani_ort)) +
   geom_col() +
   scale_x_continuous(
     labels = percent_format(prefix = "%", suffix = NULL) #<<
     ) + 
   labs(
     x = NULL, y = NULL,
-    title = "Su ürünleri yetiştiriciliği",
-    subtitle = "kıta düzeyindeyinde ortalama payı, 2016",
+    title = "Su ürünleri yetiştiriciliği oranı",
+    subtitle = "kıta ortalamaları, 2016",
     caption = "Kaynak: bit.ly/2VrawTt"
   ) +
   theme_minimal()
@@ -442,7 +442,7 @@ balikcilik_ozet %>%
 
 ---
 
-```{r bar-chart-improve-translate, echo = FALSE, message = FALSE}
+```{r bar-chart-improve-translate, echo = FALSE, message = FALSE, fig.height=4, fig.width=7}
 ```
 
 ---
@@ -455,36 +455,52 @@ class: middle
 
 ## Balıkçılık verilerini haritalama
 
-- Ülke sınırlarını data frame olarak saklayın
-- `balikcilik` data frame'ini ülke sinirlari data frame'i ile birleştirelim
-- Ülke sınırlarını çizip iclerini su ürünleri yetiştiriciliği payıyla dolduralım
+- Ülke sınırlarını veri çerçevesi olarak kaydet
+- `balikcilik` veri çerçevesini ülke sinirlari veri çerçevesi ile birleştir
+- Ülke sınırlarını çizip içlerini su ürünleri yetiştiriciliği oranıyla doldur
 
 
 ---
 
 ## `map_data()`
 
-`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir data frame'e çevirir:
+`map_data()` fonksiyonu **maps** paketindeki ülke sınırı verilerini ggplot2 ile görselleștirmesi kolay olacak bir veri çerçevesine çevirir:
 
-```{r}
-map_data("world")
+```{r map-data-dunya}
+map_data("world") %>% slice(1:15)
 ```
 
 ---
 
+## Veri çerçeveleri: `data.frame` 
 
-```{r}
-knitr::knit_exit()
+```{r map-data-dunya-df-code, eval=FALSE}
+map_data("world")
 ```
 
-# A few fixes for better matching
+```{r map-data-dunya-df-output, echo=FALSE}
+map_data("world")[1:20,]
+```
+
+---
+
+## Veri çerçeveleri: `tibble`
+
+```{r map-data-dunya-tibble}
+map_data("world") %>% as_tibble()
+```
+
+---
+
+## Daha iyi eşleşme için birkaç düzeltme
 
 .question[
-What does the following code do?
+Aşağıdaki kod ne yapar?
 ]
 
-```{r}
-world_map <- map_data("world") %>%
+```{r dunya-haritasi-duzeltme}
+dunya_haritasi <- map_data("world") %>%
+  as_tibble() %>%
   mutate(region = case_when(
     region == "UK"           ~ "United Kingdom",
     region == "USA"          ~ "United States",
@@ -496,11 +512,11 @@ world_map <- map_data("world") %>%
 
 ---
 
-## Map the world
+## Dünya haritası
 
 .midi[
-```{r fig.height=5, fig.width=12}
-ggplot(world_map, aes(x = long, y = lat, group = group)) +
+```{r fig.height=3, fig.width=7}
+ggplot(dunya_haritasi, aes(x = long, y = lat, group = group)) +
   geom_polygon(fill = "gray") +
   theme_minimal()
 ```
@@ -508,40 +524,38 @@ ggplot(world_map, aes(x = long, y = lat, group = group)) +
 
 ---
 
-## Join fisheries and world map
+## Balıkçılık ve dunya haritası veri çerçevelerini birleştirelim
 
 .pull-left[
 ```{r}
-fisheries %>% select(country)
+balikcilik %>% select(ulke)
 ```
 ]
 .pull-right[
 ```{r}
-world_map %>% select(region)
+dunya_haritasi %>% select(region)
 ```
 ]
 
 ---
 
-## Join fisheries and world map
-
 ```{r}
-fisheries_map <- left_join(fisheries, world_map, 
-                           by = c("country" = "region"))
+balikcilik_haritasi <- left_join(balikcilik, dunya_haritasi, 
+                                 by = c("ulke" = "region"))
 ```
 
 ```{r}
-glimpse(fisheries_map)
+glimpse(balikcilik_haritasi)
 ```
 
 ---
 
-## Mapping fisheries
+## Balıkçılık haritası
 
 .midi[
-```{r fig.height=4.5, fig.width=12}
-ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(fill = capture)) +
+```{r fig.height=3, fig.width=7}
+ggplot(balikcilik_haritasi, mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = uretim_orani)) +
   scale_fill_viridis_c() +
   theme_minimal()
 ```
@@ -550,13 +564,13 @@ ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
 ---
 
 .question[
-What is misleading about the following map?
+Aşağıdaki haritada yanıltıcı olan nedir?
 ]
 
 .midi[
-```{r echo=FALSE, fig.height=5, fig.width=12, fig.align="center"}
-ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(fill = capture)) +
+```{r echo=FALSE, fig.height=3, fig.width=7, fig.align="center"}
+ggplot(balikcilik_haritasi, mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = uretim_orani)) +
   scale_fill_viridis_c() +
   theme_minimal()
 ```
@@ -564,205 +578,103 @@ ggplot(fisheries_map, mapping = aes(x = long, y = lat, group = group)) +
 
 ---
 
-## Putting it altogether
+## Parçaları bir araya getirelim
 
-```{r eval=FALSE}
+```{r uretim-yuzde-haritasi, fig.show = "hide"}
 ggplot() +
-  geom_polygon(world_map, 
+  # 1. katman: bütün ülkelerin sınırları
+  geom_polygon(dunya_haritasi, #<<
                mapping = aes(x = long, y = lat, group = group), 
                fill = "lightgray") +
-  geom_polygon(fisheries_map, 
+  # 2. katman: balıkçılık verisi olan ülkelerin değerleri
+  geom_polygon(balikcilik_haritasi, #<<
                mapping = aes(x = long, y = lat, group = group, 
-                             fill = capture)) +
+                             fill = uretim_orani)) +
   scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(
-    x = "", y = "",
-    title = "Fisheries harvest by capture, 2016",
-    subtitle = "Capture measured in tonnes",
-    caption = "Source: bit.ly/2VrawTt"
-  )
+  theme_minimal()
 ```
 
 ---
 
-```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
+class: middle
+
+```{r uretim-yuzde-haritasi, echo = FALSE, fig.height=3, fig.width=7}
+```
+
+---
+
+## Görselleștirme geliștirme
+
+```{r uretim-yuzde-haritasi-gelistir, fig.show = "hide"}
 ggplot() +
-  geom_polygon(world_map, 
+  geom_polygon(dunya_haritasi,
                mapping = aes(x = long, y = lat, group = group), 
                fill = "lightgray") +
-  geom_polygon(fisheries_map, 
+  geom_polygon(balikcilik_haritasi,
                mapping = aes(x = long, y = lat, group = group, 
-                             fill = capture)) +
-  scale_fill_viridis_c() +
+                             fill = uretim_orani)) +
+  scale_fill_viridis_c(
+    labels = percent_format(suffix = NULL, prefix = "%") #<<
+    ) +  
   theme_minimal() +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom") + #<<
   labs(
-    x = "", y = "",
-    title = "Fisheries harvest by capture, 2016",
-    subtitle = "Capture measured in tonnes",
-    caption = "Source: bit.ly/2VrawTt"
+    x = NULL, y = NULL,
+    fill = "Üretim oranı", #<<
+    title = "Su ürünleri yetiştiriciliği oranı",
+    subtitle = "Toplam balıkçılık değeri 100.000 tonun üzerindeki ülkeler, 2016",
+    caption = "Kaynak: bit.ly/2VrawTt"
   )
 ```
 
 ---
 
-## Log scale
-
-```{r eval=FALSE}
-ggplot() +
-  geom_polygon(world_map, 
-               mapping = aes(x = long, y = lat, group = group), 
-               fill = "lightgray") +
-  geom_polygon(fisheries_map, 
-               mapping = aes(x = long, y = lat, group = group, 
-                                            fill = log(capture))) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(
-    x = "", y = "",
-    title = "Fisheries harvest by capture, 2016",
-    subtitle = "Capture measured in logged tonnes",
-    caption = "Source: bit.ly/2VrawTt"
-  )
+```{r uretim-yuzde-haritasi-gelistir, echo = FALSE, fig.height=5, fig.width=7}
 ```
 
 ---
 
-## Log scale
+background-image: url(img/shubham-sharan-Z-fq3wBVfMU-unsplash.jpg)
+background-position: center
+background-repeat: no-repeat
+background-size: contain
+class: inverse
 
-```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
-ggplot() +
-  geom_polygon(world_map, mapping = aes(x = long, y = lat, group = group), fill = "lightgray") +
-  geom_polygon(fisheries_map, mapping = aes(x = long, y = lat, group = group, fill = log(capture))) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(
-    x = "", y = "",
-    title = "Fisheries harvest by capture, 2016",
-    subtitle = "Capture measured in logged tonnes",
-    caption = "Source: bit.ly/2VrawTt"
-  )
-```
+# Öğretim üyeleri
 
 ---
-
-## Aquaculture
-
-```{r eval=FALSE}
-ggplot() +
-  geom_polygon(world_map, 
-               mapping = aes(x = long, y = lat, group = group), 
-               fill = "lightgray") +
-  geom_polygon(fisheries_map, 
-               mapping = aes(x = long, y = lat, group = group, 
-                             fill = log(aquaculture+1))) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(
-    x = "", y = "",
-    title = "Fisheries harvest by aquaculture, 2016",
-    subtitle = "Aquaculture measured in logged tonnes",
-    fill = "log(aquaculture)",
-    caption = "Source: bit.ly/2VrawTt"
-  )
-```
-
----
-
-```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
-ggplot() +
-  geom_polygon(world_map, mapping = aes(x = long, y = lat, group = group), fill = "lightgray") +
-  geom_polygon(fisheries_map, mapping = aes(x = long, y = lat, group = group, fill = log(aquaculture+1))) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  labs(
-    x = "", y = "",
-    title = "Fisheries harvest by aquaculture, 2016",
-    subtitle = "Aquaculture measured in logged tonnes",
-    fill = "log(aquaculture)",
-    caption = "Source: bit.ly/2VrawTt"
-  )
-```
-
----
-
-```{r echo=FALSE, fig.height=6, fig.width=10, fig.align="center"}
-fisheries_map <- fisheries_map %>%
-  mutate(
-    aquaculture_perc = aquaculture / total
-  )
-
-ggplot() +
-  geom_polygon(world_map, 
-               mapping = aes(x = long, y = lat, group = group), 
-               fill = "lightgray") +
-  geom_polygon(fisheries_map, 
-               mapping = aes(x = long, y = lat, group = group, 
-                             fill = aquaculture_perc)) +
-  scale_fill_viridis_c(labels = percent_format(accuracy = 1)) +
-  theme_minimal() +
-  theme(legend.position = "bottom", legend.key.width = unit(2, "lines")) +
-  labs(
-    x = "", y = "",
-    title = "Average share of aquaculture by country",
-    subtitle = "out of total fisheries harvest, 2016",
-    caption = "Source: bit.ly/2VrawTt",
-    fill = "Aquaculture %"
-  )
-```
-
----
-
-class: center, middle
-
-# Instructional staff employment trends
-
----
-
-The American Association of 
-University Professors (AAUP) is a nonprofit membership association of faculty 
-and other academic professionals. 
-[This report](https://www.aaup.org/sites/default/files/files/AAUP_Report_InstrStaff-75-11_apr2013.pdf) 
-by the AAUP shows trends in instructional staff employees between 1975 
-and 2011, and contains an image very similar to the one given below.
 
 ```{r echo=FALSE,out.width="80%",fig.align="center"}
 knitr::include_graphics("img/staff-employment.png")
 ```
 
+Kaynak: [American Association of University Professors (AAUP)](https://www.aaup.org/sites/default/files/files/AAUP_Report_InstrStaff-75-11_apr2013.pdf)
+
 ---
 
-## Data
+## Orjinal veri
 
-Each row in this dataset represents a faculty type, and the columns are the 
-years for which we have data. The values are percentage of hires of that type 
-of faculty for each year.
+- Satirlar: Öğretim üyesi kategorileri
+- Sütunlar: Yıllar
+- Değerler: Her yıl için bu kategorideki öğretim üyelerinin işe alınma oranı
 
 ```{r load-data-staff, message=FALSE}
-staff <- read_csv("data/instructional-staff.csv")
-staff
+ogretim_uyeleri <- read_csv("data/ogretim-uyeleri.csv")
+ogretim_uyeleri
 ```
 
 ---
 
-## Recreate the visualization
+## İstediğimiz veri
 
-In order to recreate this visualization we need to first reshape the data to have 
-one variable for faculty type and one variable for year. In other words, 
-we will convert the data from the long format to wide format. 
+- Satirlar: Fakülte categorileri
+- Sütunlar: Yıllar
+- Değerler: Her yıl için bu kategorideki öğretim üyelerinin işe alınma oranı
 
-But before we do so... 
+```{r echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("img/wide-to-long.png")
+```
 
-.question[
-If the long data will have a row for each year/faculty type combination, 
-and there are 5 faculty types and 11 years of data, how many rows will the data have?
-]
 
 ---
 
@@ -774,8 +686,7 @@ knitr::include_graphics("img/pivot.gif")
 
 ---
 
-## `pivot_*()` functions
-
+## `pivot_*()` fonksiyonlari
 
 ```{r echo=FALSE}
 knitr::include_graphics("img/tidyr-longer-wider.gif")
@@ -786,40 +697,40 @@ knitr::include_graphics("img/tidyr-longer-wider.gif")
 ## `pivot_longer()`
 
 ```{r eval=FALSE}
-pivot_longer(data, cols, names_to = "name", values_to = "value")
+pivot_longer(data, cols, names_to = "isim", values_to = "deger")
 ```
 
-- The first argument is `data` as usual.
-- The second argument, `cols`, is where you specify which columns to pivot 
-into longer format -- in this case all columns except for the `faculty_type` 
-- The third argument, `names_to`, is a string specifying the name of the column to create from the data stored in the column names of data -- in this case `year`
-- The fourth argument, `values_to`, is a string specifying the name of the column to create from the data stored in cell values, in this case `percentage`
+1. `data`
+2. `cols` (pivot edilecek sütunlar) - `kategori` dıșındaki bütün sütunlar
+3. `names_to` (orjinal verideki sütun isimlerinin koyulacağı yeni sütunun ismi) - `yil`
+4. `values_to`(orjinal verideki değerlerin koyulacağı yeni sütunun ismi) - `yuzde`
 
 ---
 
-## Pivot staff data
-
 .midi[
-```{r}
-staff_long <- staff %>%
-  pivot_longer(cols = -faculty_type, names_to = "year", 
-               values_to = "percentage") %>%
-  mutate(percentage = as.numeric(percentage))
+```{r ogretim-pivot-longer}
+ogretim_uyeleri_uzun <- ogretim_uyeleri %>%
+  pivot_longer(cols = -kategori, 
+               names_to = "yil", 
+               values_to = "yuzde") %>%
+  mutate(yuzde = as.numeric(yuzde))
 
-staff_long
+ogretim_uyeleri_uzun
 ```
 ]
 
 ---
 
 .question[
-This doesn't look quite right, how would you fix it?
+Bu görselleştirmeyi nasıl düzeltebiliriz?
 ]
 
 .small[
-```{r fig.height=2}
-staff_long %>%
-  ggplot(aes(x = percentage, y = year, color = faculty_type)) +
+```{r fig.height=3}
+ogretim_uyeleri_uzun %>%
+  ggplot(aes(x = yuzde, y = yil, 
+             color = kategori)
+         ) +
   geom_col(position = "dodge")
 ```
 ]
@@ -827,34 +738,32 @@ staff_long %>%
 ---
 
 .midi[
-```{r fig.height=2}
-staff_long %>%
-  ggplot(aes(x = percentage, y = year, fill = faculty_type)) +
+```{r fig.height=3}
+ogretim_uyeleri_uzun %>%
+  ggplot(aes(x = yuzde, y = yil, 
+             fill = kategori)  #<<
+         ) +
   geom_col(position = "dodge")
 ```
 ]
 
 ---
 
-## Some improvement...
-
 .midi[
-```{r fig.height=2}
-staff_long %>%
-  ggplot(aes(x = percentage, y = year, fill = faculty_type)) +
+```{r fig.height=3}
+ogretim_uyeleri_uzun %>%
+  ggplot(aes(x = yuzde, y = yil, fill = kategori)) +
   geom_col()
 ```
 ]
 
 ---
 
-## More improvement
-
 .midi[
-```{r fig.width=7}
-staff_long %>%
-  ggplot(aes(x = year, y = percentage, group = faculty_type, 
-             color = faculty_type)) +
+```{r fig.width=7, fig.height=3}
+ogretim_uyeleri_uzun %>%
+  ggplot(aes(x = yil, 
+             y = yuzde, group = kategori, color = kategori)) +
   geom_line() +
   theme_minimal()
 ```
@@ -863,46 +772,61 @@ staff_long %>%
 ---
 
 .midi[
-```{r fig.width=7, fig.height=4, echo=FALSE}
-staff_long %>%
-  mutate(part_time = if_else(faculty_type == "Part-Time Faculty", "Part-Time Faculty", "Other Faculty")) %>%
-  ggplot(aes(x = year, y = percentage/100, group = faculty_type, 
-             color = part_time)) +
+```{r fig.width=7, fig.height=3}
+ogretim_uyeleri_uzun %>%
+  ggplot(aes(x = as.numeric(yil), #<<
+             y = yuzde, group = kategori, color = kategori)) +
   geom_line() +
-  scale_color_manual(values = c("gray", "red")) +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
-  theme_minimal() +
-  labs(
-    title = "Instructional staff employment trends",
-    x = "Year",
-    y = "Percentage",
-    color = ""
-  ) +
-  theme(legend.position = "bottom")
+  theme_minimal()
 ```
 ]
 
 ---
 
 .midi[
-```{r eval=FALSE}
-staff_long %>%
-  mutate(part_time = 
-           if_else(faculty_type == "Part-Time Faculty", 
-                   "Part-Time Faculty", "Other Faculty")) %>%
-  ggplot(aes(x = year, y = percentage/100, group = faculty_type, 
-             color = part_time)) +
+```{r ogretim-line-default, echo=FALSE, fig.width=7, fig.height=4}
+ogretim_uyeleri_uzun %>%
+  mutate(yari_zamanli = 
+           if_else(kategori == "Yarı zamanlı öğretim görevlisi", #<<
+                   "Yarı zamanlı öğretim görevlisi", "Diğer öğretim üyeleri")) %>% #<<
+  ggplot(aes(x = as.numeric(yil), y = yuzde/100, group = kategori, 
+             color = yari_zamanli)) + #<<
   geom_line() +
-  scale_color_manual(values = c("gray", "red")) +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme_minimal()
+```
+]
+
+---
+
+.midi[
+```{r ref.label = "ogretim-line-default", eval = FALSE}
+```
+]
+
+---
+
+.midi[
+```{r ogretim-line-kirmizi, echo=FALSE, fig.width=7, fig.height=4}
+ogretim_uyeleri_uzun %>%
+  mutate(yari_zamanli = if_else(kategori == "Yarı zamanlı öğretim görevlisi", "Yarı zamanlı öğretim görevlisi", "Diğer öğretim üyeleri")) %>%
+  ggplot(aes(x = as.numeric(yil), y = yuzde/100, group = kategori, 
+             color = fct_rev(yari_zamanli))) + #<<
+  geom_line() +
+  scale_color_manual(values = c("red", "gray")) + #<<
+  scale_y_continuous(
+    labels = percent_format(accuracy = 1, prefix = "%", suffix = NULL) #<<
+    ) +
   theme_minimal() +
-  labs(
-    title = "Instructional staff employment trends",
-    x = "Year",
-    y = "Percentage",
-    color = ""
-  ) +
-  theme(legend.position = "bottom")
+  labs(title = "Öğretim üyelerinin ișe alınma trendleri", #<<
+       x = "Yil", y = "Oran", color = NULL) + #<<
+  theme(legend.position = "bottom") #<<
+```
+]
+
+---
+
+.midi[
+```{r ref.label = "ogretim-line-kirmizi", eval = FALSE}
 ```
 ]
 
@@ -912,7 +836,7 @@ class: middle, center
 
 background-image: url("img/greg-rakozy-oMpAz-DN-9I-unsplash.jpg")
 
-<font color="white" style="bold" size="100px">Learn more at tidyverse.org!</font>
+<font color="white" style="bold" size="100px">Daha fazla bilgi için: tidyverse.org ve <br> rstudio.com/resources/cheatsheets <br> (Türkçe Çeviriler)!</font>
 
 .footnote[
 Photo by Greg Rakozy on Unsplash.
