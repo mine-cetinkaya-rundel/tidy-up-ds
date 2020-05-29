@@ -667,8 +667,8 @@ ogretim_uyeleri
 
 ## İstediğimiz veri
 
-- Satirlar: Fakülte categorileri
-- Sütunlar: Yıllar
+- Satirlar: Yıl / Öğretim üyesi kategorileri kombinasyonu
+- Sütunlar: Yıl, kategori, ve yüzde
 - Değerler: Her yıl için bu kategorideki öğretim üyelerinin işe alınma oranı
 
 ```{r echo=FALSE, out.width="80%", fig.align="center"}
