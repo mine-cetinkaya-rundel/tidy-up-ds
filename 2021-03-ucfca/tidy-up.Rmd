@@ -635,12 +635,20 @@ staff_long %>%
 
 ---
 
-class: middle, center
+## Learn more
 
-background-image: url("img/greg-rakozy-oMpAz-DN-9I-unsplash.jpg")
+- tidyverse homepage: https://www.tidyverse.org/learn
 
-<font color="white" style="bold" size="100px">Learn more at tidyverse.org!</font>
+- RStudio primers: https://rstudio.cloud/learn/primers
 
-.footnote[
-Photo by Greg Rakozy on Unsplash.
-]
+- Introduction to Modern Statistics tutorials: https://openintrostat.github.io/ims-tutorials
+
+---
+
+## Stay connected and current
+
+- R Ladies: https://rladies.org
+
+- TidyTuesday: https://github.com/rfordatascience/tidytuesday
+
+- R Weekly: https://rweekly.org
