@@ -1,6 +1,6 @@
 ---
 title: "Tidy up your data science workflow with the tidyverse"
-subtitle: "rstd.io/tidy-up-ucsf"
+subtitle: "bit.ly/tidy-up-usfca"
 output:
   xaringan::moon_reader:
     css: "slides.css"

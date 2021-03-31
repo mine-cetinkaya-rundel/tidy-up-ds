@@ -15,7 +15,7 @@
 class: center, middle, inverse, title-slide
 
 # Tidy up your data science workflow with the tidyverse
-## rstd.io/tidy-up-ucsf
+## bit.ly/tidy-up-usfca
 
 ---
 
@@ -124,7 +124,7 @@ names(fisheries)
 ```
 
 ```
-## [1] "country"          "capture"          "aquaculture"      "total"            "aquaculture_perc" "continent"
+## [1] "country"     "capture"     "aquaculture"
 ```
 
 ---
@@ -138,20 +138,20 @@ fisheries
 ```
 
 ```
-## # A tibble: 68 x 6
-##    country                           capture aquaculture   total aquaculture_perc continent
-##    &lt;chr&gt;                               &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt; &lt;chr&gt;    
-##  1 Algeria                            126259         368  126627          0.00291 Africa   
-##  2 Argentina                          931472        2430  933902          0.00260 Americas 
-##  3 Australia                          245935       47087  293022          0.161   Oceania  
-##  4 Bangladesh                        1333866      882091 2215957          0.398   Asia     
-##  5 Brazil                             750283      257783 1008066          0.256   Americas 
-##  6 Cambodia                           384000       26000  410000          0.0634  Asia     
-##  7 Canada                            1080982      154083 1235065          0.125   Americas 
-##  8 Chile                             4330325      698214 5028539          0.139   Americas 
-##  9 Colombia                           121000       60072  181072          0.332   Americas 
-## 10 Congo, Democratic Republic of the  220000        2965  222965          0.0133  Africa   
-## # … with 58 more rows
+## # A tibble: 75 x 3
+##    country    capture aquaculture
+##    &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+##  1 Algeria     126259         368
+##  2 Angola      240000          NA
+##  3 Argentina   931472        2430
+##  4 Australia   245935       47087
+##  5 Bangladesh 1333866      882091
+##  6 Brazil      750283      257783
+##  7 Cambodia    384000       26000
+##  8 Canada     1080982      154083
+##  9 Chile      4330325      698214
+## 10 Colombia    121000       60072
+## # … with 65 more rows
 ```
 ]
 
@@ -177,20 +177,20 @@ fisheries
 ```
 
 ```
-## # A tibble: 68 x 6
-##    country                           capture aquaculture   total aquaculture_perc continent
-##    &lt;chr&gt;                               &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt; &lt;chr&gt;    
-##  1 Algeria                            126259         368  126627          0.00291 Africa   
-##  2 Argentina                          931472        2430  933902          0.00260 Americas 
-##  3 Australia                          245935       47087  293022          0.161   Oceania  
-##  4 Bangladesh                        1333866      882091 2215957          0.398   Asia     
-##  5 Brazil                             750283      257783 1008066          0.256   Americas 
-##  6 Cambodia                           384000       26000  410000          0.0634  Asia     
-##  7 Canada                            1080982      154083 1235065          0.125   Americas 
-##  8 Chile                             4330325      698214 5028539          0.139   Americas 
-##  9 Colombia                           121000       60072  181072          0.332   Americas 
-## 10 Congo, Democratic Republic of the  220000        2965  222965          0.0133  Africa   
-## # … with 58 more rows
+## # A tibble: 69 x 4
+##    country                           capture aquaculture   total
+##    &lt;chr&gt;                               &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Algeria                            126259         368  126627
+##  2 Argentina                          931472        2430  933902
+##  3 Australia                          245935       47087  293022
+##  4 Bangladesh                        1333866      882091 2215957
+##  5 Brazil                             750283      257783 1008066
+##  6 Cambodia                           384000       26000  410000
+##  7 Canada                            1080982      154083 1235065
+##  8 Chile                             4330325      698214 5028539
+##  9 Colombia                           121000       60072  181072
+## 10 Congo, Democratic Republic of the  220000        2965  222965
+## # … with 59 more rows
 ```
 ]
 
@@ -218,7 +218,7 @@ fisheries %&gt;% select(country)
 ```
 
 ```
-## # A tibble: 68 x 1
+## # A tibble: 69 x 1
 ##    country                          
 ##    &lt;chr&gt;                            
 ##  1 Algeria                          
@@ -231,7 +231,7 @@ fisheries %&gt;% select(country)
 ##  8 Chile                            
 ##  9 Colombia                         
 ## 10 Congo, Democratic Republic of the
-## # … with 58 more rows
+## # … with 59 more rows
 ```
 ]
 .pull-right[
@@ -460,7 +460,7 @@ fisheries %&gt;% select(country)
 ```
 
 ```
-## # A tibble: 68 x 1
+## # A tibble: 69 x 1
 ##    country                          
 ##    &lt;chr&gt;                            
 ##  1 Algeria                          
@@ -473,7 +473,7 @@ fisheries %&gt;% select(country)
 ##  8 Chile                            
 ##  9 Colombia                         
 ## 10 Congo, Democratic Republic of the
-## # … with 58 more rows
+## # … with 59 more rows
 ```
 ]
 .pull-right[
@@ -510,7 +510,7 @@ fisheries &lt;- left_join(fisheries, continents)
 ```
 
 ```
-## Joining, by = c("country", "continent")
+## Joining, by = "country"
 ```
 
 --
@@ -525,7 +525,7 @@ Hint:
 
 
 ```
-## [1] "country"          "capture"          "aquaculture"      "total"            "aquaculture_perc"
+## [1] "country"     "capture"     "aquaculture" "total"
 ```
 
 - Variables in the continents dataset:
@@ -546,8 +546,18 @@ fisheries %&gt;%
 ```
 
 ```
-## # A tibble: 0 x 6
-## # … with 6 variables: country &lt;chr&gt;, capture &lt;dbl&gt;, aquaculture &lt;dbl&gt;, total &lt;dbl&gt;, aquaculture_perc &lt;dbl&gt;, continent &lt;chr&gt;
+## # A tibble: 9 x 5
+##   country                            capture aquaculture    total continent
+##   &lt;chr&gt;                                &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;    
+## 1 Congo, Democratic Republic of the   220000        2965   222965 &lt;NA&gt;     
+## 2 Hong Kong                           161964        4130   166094 &lt;NA&gt;     
+## 3 Myanmar                            1742956      474510  2217466 &lt;NA&gt;     
+## 4 Other                              9685851      786993 10472844 &lt;NA&gt;     
+## 5 People's Republic of China        17053191    32414084 49467275 &lt;NA&gt;     
+## 6 Russian Federation                 3190946      114752  3305698 &lt;NA&gt;     
+## 7 Taiwan (Republic of China)         1017243      304756  1321999 &lt;NA&gt;     
+## 8 UK                                  669458      172813   842271 &lt;NA&gt;     
+## 9 USA                                4888621      471958  5360579 &lt;NA&gt;
 ```
 
 ---
@@ -582,8 +592,10 @@ fisheries %&gt;%
 ```
 
 ```
-## # A tibble: 0 x 6
-## # … with 6 variables: country &lt;chr&gt;, capture &lt;dbl&gt;, aquaculture &lt;dbl&gt;, total &lt;dbl&gt;, aquaculture_perc &lt;dbl&gt;, continent &lt;chr&gt;
+## # A tibble: 1 x 5
+##   country capture aquaculture    total continent
+##   &lt;chr&gt;     &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;    
+## 1 Other   9685851      786993 10472844 &lt;NA&gt;
 ```
 
 ---
